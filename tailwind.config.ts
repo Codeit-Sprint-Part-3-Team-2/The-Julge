@@ -39,6 +39,7 @@ export default {
           10: '#D4F7D4',
         },
         kakao: '#FEE500',
+        orange: '#EA3C12',
       },
     },
   },
