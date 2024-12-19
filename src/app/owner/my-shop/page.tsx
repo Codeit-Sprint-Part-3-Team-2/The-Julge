@@ -1,22 +1,28 @@
-import Link from 'next/link';
+'use client';
+
+import AddPost from '@/app/components/my-shop/AddPost';
 
 export default function MyShopPage() {
   return (
-    <section className="h-[90vh] w-full px-3 pt-36 md:h-screen md:px-8 md:pt-32 xl:px-60">
-      <h3 className="mb-4 text-lg font-bold md:mb-6 md:text-[1.75rem]">내 가게</h3>
-      <div className="w-full rounded-lg border border-gray-20">
-        <div className="flex flex-col items-center gap-4 px-6 py-16 md:gap-6">
-          <p className="text-sm font-normal text-gray-black md:text-base">
-            내 가게를 소개하고 공고도 등록해 보세요.
-          </p>
-          <Link
-            className="flex h-[2.3125rem] w-full max-w-[6.75rem] items-center justify-center rounded-md bg-orange md:h-[2.9375rem] md:max-w-[21.625rem]"
-            href="my-shop/register"
-          >
-            <span className="text-sm text-gray-white md:text-base">가게 등록하기</span>
-          </Link>
-        </div>
+    <>
+      <div className="container">
+        <section className="mt-16">
+          <h3 className="h3">내 가게</h3>
+          <AddPost
+            content="가게를 등록해 보세요."
+            buttonLink="/owner/my-shop/register"
+            buttonText="가게 등록하기"
+          />
+        </section>
+        <section className="my-32">
+          <h3 className="h3">등록한 공고</h3>
+          <AddPost
+            content="공고를 등록해 보세요."
+            buttonLink="/owner/my-shop/notice/register"
+            buttonText="공고 등록하기"
+          />
+        </section>
       </div>
-    </section>
+    </>
   );
 }
