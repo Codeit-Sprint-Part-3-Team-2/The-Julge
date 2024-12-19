@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { Geist, Geist_Mono } from 'next/font/google';
 import './styles/globals.css';
 import Footer from './components/layout/Footer';
+import Head from 'next/head';
 import Header from './components/navigation/Header';
 
 const geistSans = Geist({
@@ -29,6 +30,9 @@ export default function RootLayout({
 
   return (
     <html lang="ko">
+      <Head>
+        <link rel="icon" href="/favicon.ico" />
+      </Head>
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
         <Header hiddenPaths={hiddenPaths} />
         {children}
