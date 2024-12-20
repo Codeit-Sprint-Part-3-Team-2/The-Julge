@@ -59,15 +59,7 @@ export const presignedImg = async (fileName: string): Promise<string> => {
     }
 
     // Presigned URL 생성 요청
-    const response = await API.post(
-      '/images',
-      { name: fileName },
-      {
-        headers: {
-          Authorization: `Bearer ${token}`, // Bearer 토큰을 Authorization 헤더에 추가
-        },
-      }
-    );
+    const response = await API.post('/images', { name: fileName });
     return response.data.item.url;
   } catch (error) {
     console.error('이미지 URL 생성 실패:', error);
