@@ -57,7 +57,7 @@ const thStyle = 'px-3 py-[0.875rem] font-normal';
 
 const ApplicationHistory = () => {
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 5; 
+  const itemsPerPage = 5;
   const router = useRouter();
 
   // 페이지네이션: 현재 페이지에 해당하는 데이터
@@ -71,7 +71,7 @@ const ApplicationHistory = () => {
   // 페이지네이션 변경
   const paginate = (pageNumber: number) => setCurrentPage(pageNumber);
 
-  //공고보러가기
+  // 공고보러가기
   const handleClick = () => {
     router.push('/posts');
   };
@@ -131,11 +131,7 @@ const ApplicationHistory = () => {
             </div>
 
             {/* 페이지네이션 */}
-            <Pagination
-              currentPage={currentPage}
-              totalPages={totalPages}
-              paginate={paginate}
-            />
+            <Pagination currentPage={currentPage} totalPages={totalPages} paginate={paginate} />
           </div>
         </>
       )}
