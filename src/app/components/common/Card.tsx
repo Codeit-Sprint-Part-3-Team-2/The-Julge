@@ -16,6 +16,7 @@ interface CardProps {
   shopId: string;
   onClick: () => void;
   closed?: boolean;
+  past?: boolean;
 }
 
 const Card: React.FC<CardProps> = ({
@@ -30,24 +31,32 @@ const Card: React.FC<CardProps> = ({
   shopId,
   onClick,
   closed = false,
+  past = false,
 }) => {
   const discountValue = discount ? parseInt(discount.match(/\d+/)?.[0] || '0', 10) : 0;
-  const discountClass = closed
-    ? 'bg-gray-20 text-white'
-    : `text-red-40 sm:text-white ${
-        discountValue >= 50 ? 'sm:bg-red-40' : discountValue >= 30 ? 'sm:bg-red-30' : 'sm:bg-red-20'
-      }`;
+  const discountClass =
+    closed || past
+      ? 'bg-gray-20 text-white'
+      : `text-red-40 sm:text-white ${
+          discountValue >= 50
+            ? 'sm:bg-red-40'
+            : discountValue >= 30
+              ? 'sm:bg-red-30'
+              : 'sm:bg-red-20'
+        }`;
 
-  const closeTextClass = closed ? 'text-gray-30' : 'text-gray-black';
-  const closeImageTextClass = closed ? 'text-gray-30' : 'text-gray-50';
+  const closeTextClass = closed || past ? 'text-gray-30' : 'text-gray-black';
+  const closeImageTextClass = closed || past ? 'text-gray-30' : 'text-gray-50';
 
   return (
     <Link href={`/${shopId}/${noticeId}`} onClick={onClick}>
-      <div className="h-[262px] w-44 rounded-xl border border-gray-20 bg-white p-4 sm:h-auto sm:w-[312px]">
+      <div className="w-44 rounded-xl border border-gray-20 bg-white p-4 sm:w-[312px]">
         <div className="relative h-20 w-full sm:h-40">
-          {closed && (
+          {(closed || past) && (
             <div className="absolute inset-0 z-10 flex items-center justify-center rounded-xl bg-black bg-opacity-70">
-              <span className="text-xl font-bold text-gray-30 sm:text-[28px]">마감 완료</span>
+              <span className="text-xl font-bold text-gray-30 sm:text-[28px]">
+                {closed ? '마감 완료' : '지난 공고'}
+              </span>
             </div>
           )}
           <Image
@@ -64,7 +73,7 @@ const Card: React.FC<CardProps> = ({
 
           <div className="mt-2 flex items-start gap-1">
             <Image
-              src={closed ? '/my-shop/closeClock.svg' : '/images/clock-icon.svg'}
+              src={closed || past ? '/my-shop/closeClock.svg' : '/images/clock-icon.svg'}
               alt="시계"
               width={16}
               height={16}
@@ -77,7 +86,7 @@ const Card: React.FC<CardProps> = ({
           </div>
           <div className="mt-2 flex gap-1">
             <Image
-              src={closed ? '/my-shop/closeLocation.svg' : '/images/location.svg'}
+              src={closed || past ? '/my-shop/closeLocation.svg' : '/images/location.svg'}
               alt="위치"
               width={16}
               height={16}

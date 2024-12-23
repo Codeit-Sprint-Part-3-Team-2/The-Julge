@@ -2,6 +2,7 @@ import React from 'react';
 import { useRecentNoticesStore } from '@/app/stores/useRecentNoticesStore';
 import Card from '../../common/Card';
 import formatTimeRange from '@/app/utils/formatTimeRange';
+import isPastNotice from '@/app/utils/isPastNotice';
 
 export default function RecentNoticesPage() {
   const recentNotices = useRecentNoticesStore((state) => state.recentNotices);
@@ -22,6 +23,8 @@ export default function RecentNoticesPage() {
             100
           ).toFixed(0);
 
+          const isPast = isPastNotice(notice.startsAt);
+
           return (
             <Card
               key={notice.id}
@@ -36,6 +39,7 @@ export default function RecentNoticesPage() {
               shopId={notice.shopId}
               onClick={() => addNotice(notice)}
               closed={notice.closed}
+              past={isPast}
             />
           );
         })}

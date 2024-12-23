@@ -25,7 +25,7 @@ const NoticeDropdown: React.FC<{ onChange: (sortOption: string) => void }> = ({ 
       </button>
 
       {isOpen && (
-        <ul className="absolute left-0 z-10 mt-2 w-[105px] rounded-md border border-gray-20 bg-gray-white shadow-lg">
+        <ul className="absolute left-0 z-50 mt-2 w-[105px] rounded-md border border-gray-20 bg-gray-white shadow-lg">
           {menuItems.map((item, index) => (
             <li key={index}>
               <button

@@ -10,6 +10,7 @@ import Card from '../common/Card';
 import axios from 'axios';
 import formatTimeRange from '../../utils/formatTimeRange';
 import { useRecentNoticesStore } from '@/app/stores/useRecentNoticesStore';
+import isPastNotice from '@/app/utils/isPastNotice';
 
 interface ShopItem {
   id: string;
@@ -80,6 +81,8 @@ export default function CustomNotices() {
           100
         ).toFixed(0);
 
+        const isPast = isPastNotice(notice.startsAt);
+
         return (
           <SwiperSlide key={notice.id} className="max-w-[176px] sm:max-w-[312px]">
             <Card
@@ -94,6 +97,7 @@ export default function CustomNotices() {
               shopId={notice.shop.item.id}
               onClick={() => addNotice(notice)}
               closed={notice.closed}
+              past={isPast}
             />
           </SwiperSlide>
         );
