@@ -23,7 +23,8 @@ body {
 
 @layer utilities {
   .container {
-    width: 75%;
+    max-width: 964px;
+    width: 90%;
     margin: 0 auto;
   }
 
@@ -33,9 +34,18 @@ body {
     font-weight: 700;
   }
 
+  .label {
+    font-weight: 700;
+    color: #ea3c12;
+  }
+
   @media (max-width: 640px) {
     .h3 {
       font-size: 1.25rem;
+    }
+
+    .label {
+      font-size: 0.875rem;
     }
   }
 }

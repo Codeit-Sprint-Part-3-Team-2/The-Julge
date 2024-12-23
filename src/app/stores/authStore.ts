@@ -32,21 +32,13 @@ const useAuthStore = create<AuthStore>()(
       },
 
       signup: async (data: Auth): Promise<AuthResponse> => {
-        const response = await instance.post('/users', data, {
-          headers: {
-            'Content-Type': 'application/json',
-          },
-        });
+        const response = await instance.post('/users', data);
 
         return response.data;
       },
 
       login: async (data: Auth): Promise<AuthResponse> => {
-        const response = await instance.post('/token', data, {
-          headers: {
-            'Content-Type': 'application/json',
-          },
-        });
+        const response = await instance.post('/token', data);
 
         set({ token: response.data.item.token });
         set({ userId: response.data.item.user.item.id });

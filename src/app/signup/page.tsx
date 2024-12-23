@@ -3,16 +3,20 @@
 import React, { useState } from 'react';
 import { useForm, SubmitHandler } from 'react-hook-form';
 import { useRouter } from 'next/navigation';
+import axios from 'axios';
 import Image from 'next/image';
 import Modal from '../components/modal/modal';
 import Button from '../components/common/Button';
+
+// **API Base URL 추가**
+const BASE_URL = 'https://bootcamp-api.codeit.kr/api/11-2/the-julge/users';
 
 // Form 데이터 타입 정의
 interface SignupFormInputs {
   email: string;
   password: string;
   confirmPassword: string;
-  userType: string; // 회원 유형 추가
+  userType: string;
 }
 
 const emailRegex = /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i;
@@ -20,7 +24,15 @@ const emailRegex = /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i;
 function SignupPage() {
   const [showModal, setShowModal] = useState(false);
   const [modalMessage, setModalMessage] = useState('');
+  const [isSignupComplete, setIsSignupComplete] = useState(false);
   const router = useRouter();
+
+  const handleCloseModal = () => {
+    setShowModal(false);
+    if (isSignupComplete) {
+      router.push('/login');
+    }
+  };
 
   const {
     register,
@@ -33,18 +45,35 @@ function SignupPage() {
     mode: 'onBlur',
   });
 
-  const onSubmit: SubmitHandler<SignupFormInputs> = (data) => {
-    const { email } = data;
+  const onSubmit: SubmitHandler<SignupFormInputs> = async (data) => {
+    const { email, password, userType } = data;
 
-    // Mock 이메일 중복 확인 로직
-    const emailExists = email === 'test@test.com';
+    try {
+      const signupResponse = await axios.post(`${BASE_URL}`, {
+        email: email,
+        password: password,
+        type: userType,
+      });
 
-    if (emailExists) {
-      setModalMessage('이미 사용중인 이메일입니다');
-      setShowModal(true);
-    } else {
-      alert('가입이 완료되었습니다');
-      router.push('/login');
+      if (signupResponse.status === 201) {
+        setModalMessage('가입이 완료되었습니다.');
+        setIsSignupComplete(true);
+        setShowModal(true);
+      }
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        // AxiosError 타입으로 안전하게 처리
+        if (error.response?.status === 409) {
+          setModalMessage('이미 사용중인 이메일입니다.');
+          setShowModal(true);
+          return;
+        } else if (error.response?.status === 400) {
+          alert('잘못된 형식입니다.');
+          return;
+        }
+      }
+      alert('회원가입 중 오류가 발생했습니다. 다시 시도해 주세요.');
+      setIsSignupComplete(false);
     }
   };
 
@@ -53,7 +82,7 @@ function SignupPage() {
   return (
     <div className="flex min-h-screen items-center justify-center bg-gray-white">
       {/* 모달 컴포넌트 */}
-      <Modal isOpen={showModal} onClose={() => setShowModal(false)}>
+      <Modal isOpen={showModal} onClose={handleCloseModal}>
         {modalMessage}
       </Modal>
 
@@ -64,9 +93,8 @@ function SignupPage() {
             alt="Logo"
             fill
             priority
-            sizes="(max-width: 248px) 208px, (max-width: 1200px) 400px, 800px"
-            className="mx-auto mb-10 cursor-pointer"
-            onClick={() => router.push('/posts')}
+            className="mx-auto cursor-pointer"
+            onClick={() => router.push('/')}
           />
         </div>
 
@@ -91,11 +119,11 @@ function SignupPage() {
               })}
               onBlur={() => trigger('email')}
               className={`w-full rounded-md border px-5 py-4 text-sm ${
-                errors.email ? 'border-red-50' : ''
+                errors.email ? 'border-orange' : ''
               }`}
               placeholder="입력"
             />
-            {errors.email && <p className="mt-1 text-sm text-red-50">{errors.email?.message}</p>}
+            {errors.email && <p className="mt-1 text-sm text-orange">{errors.email?.message}</p>}
           </div>
 
           {/* 비밀번호 입력 */}
@@ -118,12 +146,12 @@ function SignupPage() {
               })}
               onBlur={() => trigger('password')}
               className={`w-full rounded-md border px-5 py-4 text-sm ${
-                errors.password ? 'border-red-50' : ''
+                errors.password ? 'border-orange' : ''
               }`}
               placeholder="입력"
             />
             {errors.password && (
-              <p className="mt-1 text-sm text-red-50">{errors.password?.message}</p>
+              <p className="mt-1 text-sm text-orange">{errors.password?.message}</p>
             )}
           </div>
 
@@ -144,12 +172,12 @@ function SignupPage() {
               })}
               onBlur={() => trigger('confirmPassword')}
               className={`w-full rounded-md border px-5 py-4 text-sm ${
-                errors.confirmPassword ? 'border-red-50' : ''
+                errors.confirmPassword ? 'border-orange' : ''
               }`}
               placeholder="입력"
             />
             {errors.confirmPassword && (
-              <p className="mt-1 text-sm text-red-50">{errors.confirmPassword?.message}</p>
+              <p className="mt-1 text-sm text-orange">{errors.confirmPassword?.message}</p>
             )}
           </div>
 
@@ -165,16 +193,16 @@ function SignupPage() {
               <button
                 type="button"
                 className={`flex w-full items-center justify-center gap-2 rounded-full border px-4 py-2 text-sm text-black ${
-                  userTypeValue === '일반회원' ? 'border-red-50' : 'border-gray-30'
+                  userTypeValue === 'employee' ? 'border-orange' : 'border-gray-30'
                 }`}
-                onClick={() => setValue('userType', '일반회원')}
+                onClick={() => setValue('userType', 'employee')}
               >
                 <span
                   className={`flex h-4 w-4 items-center justify-center rounded-full border ${
-                    userTypeValue === '일반회원' ? 'border-red-50 bg-red-50' : 'border-gray-30'
+                    userTypeValue === 'employee' ? 'border-orange bg-orange' : 'border-gray-30'
                   }`}
                 >
-                  {userTypeValue === '일반회원' && (
+                  {userTypeValue === 'employee' && (
                     <span className="text-xs text-gray-white">✔</span>
                   )}
                 </span>
@@ -184,16 +212,16 @@ function SignupPage() {
               <button
                 type="button"
                 className={`flex w-full items-center justify-center gap-2 rounded-full border px-4 py-2 text-sm text-black ${
-                  userTypeValue === '사업자회원' ? 'border-red-50' : 'border-gray-30'
+                  userTypeValue === 'employer' ? 'border-orange' : 'border-gray-30'
                 }`}
-                onClick={() => setValue('userType', '사업자회원')}
+                onClick={() => setValue('userType', 'employer')}
               >
                 <span
                   className={`flex h-4 w-4 items-center justify-center rounded-full border ${
-                    userTypeValue === '사업자회원' ? 'border-red-50 bg-red-50' : 'border-gray-30'
+                    userTypeValue === 'employer' ? 'border-orange bg-orange' : 'border-gray-30'
                   }`}
                 >
-                  {userTypeValue === '사업자회원' && (
+                  {userTypeValue === 'employer' && (
                     <span className="text-xs text-gray-white">✔</span>
                   )}
                 </span>
@@ -201,7 +229,7 @@ function SignupPage() {
               </button>
             </div>
             {errors.userType && (
-              <p className="mt-1 text-sm text-red-50">{errors.userType?.message}</p>
+              <p className="mt-1 text-sm text-orange">{errors.userType?.message}</p>
             )}
           </div>
 

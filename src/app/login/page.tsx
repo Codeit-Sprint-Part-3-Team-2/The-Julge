@@ -3,11 +3,13 @@
 import React, { useState } from 'react';
 import { useForm, SubmitHandler } from 'react-hook-form';
 import { useRouter } from 'next/navigation';
+import axios from 'axios';
 import Image from 'next/image';
 import Modal from '../components/modal/modal';
 import Button from '../components/common/Button';
 
-// Form 데이터 타입 정의
+const BASE_URL = 'https://bootcamp-api.codeit.kr/api/11-2/the-julge/token';
+
 interface LoginFormInputs {
   email: string;
   password: string;
@@ -16,8 +18,8 @@ interface LoginFormInputs {
 const emailRegex = /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i;
 
 function LoginPage() {
-  const [showModal, setShowModal] = useState(false); // 모달 상태 관리
-  const router = useRouter(); // useRouter 선언
+  const [showModal, setShowModal] = useState(false);
+  const router = useRouter();
 
   const {
     register,
@@ -25,21 +27,26 @@ function LoginPage() {
     formState: { errors },
     trigger,
   } = useForm<LoginFormInputs>({
-    mode: 'onBlur', // 포커스 아웃 시 유효성 검사 실행
+    mode: 'onBlur',
   });
 
-  const onSubmit: SubmitHandler<LoginFormInputs> = (data) => {
+  const onSubmit: SubmitHandler<LoginFormInputs> = async (data) => {
     const { email, password } = data;
 
-    // Mock API 응답 처리
-    const loginSuccess = email === 'test@test.com' && password === 'password123';
+    try {
+      // 서버로 로그인 요청
+      const response = await axios.post(BASE_URL, { email: email, password: password });
 
-    if (loginSuccess) {
-      localStorage.setItem('accessToken', 'mockAccessToken123'); // 엑세스 토큰 저장
-      alert('로그인 성공!');
-      router.push('/posts'); // 공고 리스트 페이지로 이동
-    } else {
-      setShowModal(true); // 비밀번호 불일치 시 모달 표시
+      if (response.status === 200) {
+        // 로그인 성공: accessToken 저장 및 페이지 이동
+        const { accessToken } = response.data;
+        localStorage.setItem('accessToken', accessToken);
+        router.push('/');
+      }
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        setShowModal(true);
+      }
     }
   };
 
@@ -51,15 +58,14 @@ function LoginPage() {
       </Modal>
 
       <div className="relative flex w-full max-w-md flex-col bg-gray-white p-4">
-        <div className="relative mx-auto h-[45px] w-[208px] sm:w-[248px]">
+        <div className="relative mx-auto mb-10 h-[45px] w-[208px] sm:w-[248px]">
           <Image
             src="/images/logo.svg"
             alt="Logo"
             fill
             priority
-            sizes="(max-width: 248px) 208px, (max-width: 1200px) 400px, 800px"
-            className="mx-auto mb-10 cursor-pointer"
-            onClick={() => router.push('/posts')}
+            className="mx-auto cursor-pointer"
+            onClick={() => router.push('/')}
           />
         </div>
 
@@ -85,7 +91,7 @@ function LoginPage() {
               className={`w-full rounded-md border px-5 py-4 text-sm`}
               placeholder="입력"
             />
-            {errors.email && <p className="mt-1 text-sm text-red-50">{errors.email?.message}</p>}
+            {errors.email && <p className="mt-1 text-sm text-orange">{errors.email?.message}</p>}
           </div>
 
           <div className="flex flex-col gap-2">
@@ -110,7 +116,7 @@ function LoginPage() {
               placeholder="입력"
             />
             {errors.password && (
-              <p className="mt-1 text-sm text-red-50">{errors.password?.message}</p>
+              <p className="mt-1 text-sm text-orange">{errors.password?.message}</p>
             )}
           </div>
 

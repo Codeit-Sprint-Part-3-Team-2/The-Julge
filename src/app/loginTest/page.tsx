@@ -2,6 +2,7 @@
 
 import useAuthStore from '@/app/stores/authStore';
 
+// 배포 시 삭제 될 페이지입니다.
 export default function NoticePage() {
   const { login, signup, logout, getMe, user, userId, type, token } = useAuthStore();
 

@@ -1,4 +1,5 @@
 import React from 'react';
+import Button from '../common/Button';
 
 interface ModalProps {
   isOpen: boolean; // 모달 열림 상태
@@ -16,15 +17,15 @@ const Modal: React.FC<ModalProps> = ({ isOpen, onClose, children }) => {
         <div className="flex flex-1 items-center justify-center text-center text-base text-gray-800 sm:text-lg">
           {children}
         </div>
+
         {/* 확인 버튼 */}
         <div className="mt-auto flex justify-center sm:justify-end">
-          <button
+          <Button
             onClick={onClose} // 모달 닫기 이벤트
-            className="w-28 rounded-md py-2 text-white hover:bg-opacity-90"
-            style={{ backgroundColor: '#ea3c12' }}
+            className="w-28 rounded-md bg-orange py-2 text-white hover:bg-opacity-90"
           >
             확인
-          </button>
+          </Button>
         </div>
       </div>
     </div>
