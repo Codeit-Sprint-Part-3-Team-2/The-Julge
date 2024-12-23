@@ -7,16 +7,16 @@ export default function NoticePage() {
   const { login, signup, logout, getMe, user, userId, type, token } = useAuthStore();
 
   const handleLogin = async () => {
-    console.log(await login({ email: 'qwerasdf@asdf.com', password: 'asdfasdf1' }));
+    console.log(await login({ email: '1qwerasdf@asdf.com', password: '1asdfasdf1', type: 'employee' }));
   };
 
   // 테스트 시 signup email, password 변경 필요
   const handleSignup = async () => {
     console.log(
       await signup({
-        email: 'qwerasdf@asdf.com',
-        password: 'asdfasdf1',
-        type: 'employer',
+        email: '1qwerasdf@asdf.com',
+        password: '1asdfasdf1',
+        type: 'employee',
       })
     );
   };

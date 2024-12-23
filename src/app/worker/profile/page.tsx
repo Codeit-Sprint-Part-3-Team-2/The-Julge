@@ -1,63 +1,78 @@
 'use client';
-import { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import LayoutWrapper from '@/app/components/worker/LayoutWrapper';
 import EmptyContent from '@/app/components/worker/EmptyContent';
 import ProfileInfo from '@/app/components/worker/ProfileInfo';
 import ApplicationHistory from '@/app/components/worker/ApplicationHistory';
+import useAuthStore from '@/app/stores/authStore';
 
 const ProfilePage = () => {
-  // 임시 프로필 등록 여부 상태
-  const [isProfileRegistered, setIsProfileRegistered] = useState<boolean | null>(null);
+  const { profileRegistered, getMe, type, token, userId } = useAuthStore();
   const router = useRouter();
-
-  // 임시 프로필 등록 상태 확인
+  const [loading, setLoading] = useState(true); 
   useEffect(() => {
-    const fetchProfileStatus = async () => {
-      const profileStatus = await checkProfileStatus();
-      setIsProfileRegistered(profileStatus);
+    console.log('Tokennnnn:', token);
+    const fetchData = async () => {
+      if (token && userId) {
+        try {
+          await getMe();  
+        } catch (error) {
+          console.error('getMe 실패:', error);
+        } finally {
+          setLoading(false); 
+        }
+      } else {
+        setLoading(false);  
+        router.push('/login');  // 로그인 페이지로 리디렉션
+      }
     };
 
-    fetchProfileStatus();
-  }, []);
+    fetchData();
+  }, [token, userId, getMe, router]);
 
-  // 프로필 상태를 확인중
-  if (isProfileRegistered === null) {
-    return <div>로딩 중...</div>;
+  // `type`이 'employee'가 아닌 경우, 메인 페이지로 리디렉션
+  useEffect(() => {
+    if (type && type !== 'employee') {
+      router.push('/');  // 'employee' 타입이 아니면 메인 페이지로 리디렉션
+    }
+  }, [type, router]);
+
+
+  if (loading) {
+    return <div>로딩 중...</div>; 
   }
-
-  const handleClick = () => {
-    router.push('/worker/profile/register');
-  };
 
   return (
     <div className="text-gray-black">
-      {!isProfileRegistered ? (
-        // 프로필과 신청 내역
-        <>
+      {profileRegistered === null ? (
+        <div>로딩 중...</div>  
+      ) : type === 'employee' ? (
+        profileRegistered ? (
+          // 'employee' 타입이고 프로필이 등록된 경우
+          <>
+            <LayoutWrapper>
+              <ProfileInfo />
+            </LayoutWrapper>
+            <ApplicationHistory />
+          </>
+        ) : (
+          // 'employee' 타입이지만 프로필이 없는 경우
           <LayoutWrapper>
-            <ProfileInfo />
+            <EmptyContent
+              title="내 프로필"
+              content="내 프로필을 등록하고 원하는 가게에 지원해 보세요."
+              buttonText="내 프로필 등록하기"
+              onButtonClick={() => router.push('/worker/profile/register')}
+            />
           </LayoutWrapper>
-          <ApplicationHistory />
-        </>
+        )
       ) : (
-        // 프로필 없는 경우
-        <LayoutWrapper>
-          <EmptyContent
-            title="내 프로필"
-            content="내 프로필을 등록하고 원하는 가게에 지원해 보세요."
-            buttonText="내 프로필 등록하기"
-            onButtonClick={handleClick}
-          />
-        </LayoutWrapper>
+        // 'employee' 타입이 아닌 경우
+        <div>접근 권한이 없습니다.</div>
       )}
     </div>
   );
-};
-
-// 임시 프로필 등록 여부 확인
-const checkProfileStatus = async () => {
-  return false;
 };
 
 export default ProfilePage;

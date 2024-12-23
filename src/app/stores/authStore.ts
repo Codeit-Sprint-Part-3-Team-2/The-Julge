@@ -10,13 +10,14 @@ const useAuthStore = create<AuthStore>()(
       userId: null,
       type: null,
       token: null,
+      profileRegistered: false,
 
       getMe: async () => {
         const token = get().token;
         const userId = get().userId;
 
         if (!token || !userId) {
-          return set({ user: null });
+          return set({ user: null, });
         }
 
         const response = await instance.get(`/users/${userId}`, {
