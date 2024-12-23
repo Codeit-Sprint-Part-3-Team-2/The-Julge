@@ -86,6 +86,7 @@ export default function AllNotices({
               noticeId={notice.id}
               shopId={notice.shopId}
               onClick={() => addNotice(notice)}
+              closed={notice.closed}
             />
           </div>
         );

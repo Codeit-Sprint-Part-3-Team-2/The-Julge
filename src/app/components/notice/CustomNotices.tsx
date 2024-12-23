@@ -44,8 +44,8 @@ export default function CustomNotices() {
     const fetchCustomNotices = async () => {
       try {
         const response = await axios.get<ApiResponse>(
-          'https://bootcamp-api.codeit.kr/api/11-2/the-julge/notices?offset=0&limit=10'
-        ); // 맞춤공고는 현재 데이터를 10개 받아오는데 설정한 "지역"을 기준으로 불러오게 로직을 변경할 예정입니다.
+          'https://bootcamp-api.codeit.kr/api/11-2/the-julge/notices?offset=0&limit=20'
+        ); // 맞춤공고는 현재 데이터를 20개 받아오는데 설정한 "지역"을 기준으로 불러오게 로직을 변경할 예정입니다.
         const formattedData = response.data.items.map((data) => ({
           ...data.item,
           shopId: data.item.shop.item.id,
@@ -93,6 +93,7 @@ export default function CustomNotices() {
               noticeId={notice.id}
               shopId={notice.shop.item.id}
               onClick={() => addNotice(notice)}
+              closed={notice.closed}
             />
           </SwiperSlide>
         );

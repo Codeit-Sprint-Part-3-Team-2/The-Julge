@@ -1,6 +1,7 @@
 import React from 'react';
 import { useRecentNoticesStore } from '@/app/stores/useRecentNoticesStore';
 import Card from '../../common/Card';
+import formatTimeRange from '@/app/utils/formatTimeRange';
 
 export default function RecentNoticesPage() {
   const recentNotices = useRecentNoticesStore((state) => state.recentNotices);
@@ -27,13 +28,14 @@ export default function RecentNoticesPage() {
               image={notice.shop.item.imageUrl}
               title={notice.shop.item.name}
               date={notice.startsAt.split('T')[0]}
-              hours={notice.workhour + '시간'}
+              hours={formatTimeRange(notice.startsAt, notice.workhour)}
               location={notice.shop.item.address1}
               price={`${notice.hourlyPay.toLocaleString()}원`}
               discount={parseFloat(increaseRate) > 0 ? `기존 시급보다 ${increaseRate}%` : undefined}
               noticeId={notice.id}
               shopId={notice.shopId}
               onClick={() => addNotice(notice)}
+              closed={notice.closed}
             />
           );
         })}
