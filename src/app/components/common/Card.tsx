@@ -43,7 +43,7 @@ const Card: React.FC<CardProps> = ({
 
   return (
     <Link href={`/${shopId}/${noticeId}`} onClick={onClick}>
-      <div className="w-44 rounded-xl border border-gray-20 bg-white p-4 sm:w-[312px]">
+      <div className="h-[262px] w-44 rounded-xl border border-gray-20 bg-white p-4 sm:h-auto sm:w-[312px]">
         <div className="relative h-20 w-full sm:h-40">
           {closed && (
             <div className="absolute inset-0 z-10 flex items-center justify-center rounded-xl bg-black bg-opacity-70">
@@ -59,7 +59,7 @@ const Card: React.FC<CardProps> = ({
           />
         </div>
 
-        <div className="mt-4">
+        <div className="mt-3">
           <h3 className={`text-base font-bold sm:text-xl ${closeTextClass}`}>{title}</h3>
 
           <div className="mt-2 flex items-start gap-1">
