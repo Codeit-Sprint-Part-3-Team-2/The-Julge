@@ -50,7 +50,7 @@ const Card: React.FC<CardProps> = ({
 
   return (
     <Link href={`/${shopId}/${noticeId}`} onClick={onClick}>
-      <div className="w-44 rounded-xl border border-gray-20 bg-white p-4 sm:w-[312px]">
+      <div className="h-full w-[170px] rounded-xl border border-gray-20 bg-white p-4 sm:w-[312px]">
         <div className="relative h-20 w-full sm:h-40">
           {(closed || past) && (
             <div className="absolute inset-0 z-10 flex items-center justify-center rounded-xl bg-black bg-opacity-70">

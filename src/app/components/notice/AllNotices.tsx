@@ -34,6 +34,7 @@ interface AllNoticesProps {
   setTotalItems: (total: number) => void;
   sortOption: string;
   filterOptions: { locations: string[]; startDate: string; amount: string };
+  query?: string;
 }
 
 export default function AllNotices({
@@ -42,6 +43,7 @@ export default function AllNotices({
   setTotalItems,
   sortOption,
   filterOptions,
+  query = '',
 }: AllNoticesProps) {
   const [notices, setNotices] = useState<NoticeItem[]>([]);
   const addNotice = useRecentNoticesStore((state) => state.addNotice);
@@ -53,7 +55,8 @@ export default function AllNotices({
           currentPage,
           itemsPerPage,
           sortOption,
-          filterOptions
+          filterOptions,
+          query
         );
         setNotices(items);
         setTotalItems(count);
@@ -63,7 +66,11 @@ export default function AllNotices({
     };
 
     getNotices();
-  }, [currentPage, itemsPerPage, setTotalItems, sortOption, filterOptions]);
+  }, [currentPage, itemsPerPage, setTotalItems, sortOption, filterOptions, query]);
+
+  if (notices.length === 0) {
+    return <div className="text-center text-gray-40">해당하는 공고 목록이 존재하지 않아요.</div>;
+  }
 
   return (
     <div className="grid grid-cols-2 gap-4 lg:grid-cols-3">
