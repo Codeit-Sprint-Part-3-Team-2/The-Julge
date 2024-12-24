@@ -24,13 +24,15 @@ interface NoticeItem {
 interface ApiResponse {
   items: { item: NoticeItem }[];
   count: number;
+  hasNext: boolean;
 }
 
 export const fetchNotices = async (
   currentPage: number,
   itemsPerPage: number,
   sortOption: string,
-  filterOptions: { locations: string[]; startDate: string; amount: string }
+  filterOptions: { locations: string[]; startDate: string; amount: string },
+  keyword?: string
 ): Promise<{ items: NoticeItem[]; count: number }> => {
   try {
     let url = `https://bootcamp-api.codeit.kr/api/11-2/the-julge/notices?offset=${
@@ -53,12 +55,17 @@ export const fetchNotices = async (
       url += `&hourlyPayGte=${filterOptions.amount}`;
     }
 
+    if (keyword) {
+      url += `&keyword=${encodeURIComponent(keyword)}`;
+    }
+
     const response = await axios.get<ApiResponse>(url);
 
     const formattedData = response.data.items.map((data) => ({
       ...data.item,
       shopId: data.item.shop.item.id,
     }));
+
     return { items: formattedData, count: response.data.count };
   } catch (error) {
     console.error('Error fetching notices:', error);
