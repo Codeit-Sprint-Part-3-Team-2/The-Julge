@@ -9,6 +9,7 @@ import Button from '../../common/Button';
 import LoadingSpinner from '../../common/LoadingSpinner';
 import getDiscountClass from '@/app/utils/getDiscountClass';
 import isPastNotice from '@/app/utils/isPastNotice';
+import Modal from '../../modal/modal';
 
 interface ShopItem {
   name: string;
@@ -31,19 +32,35 @@ interface NoticeDetail {
   };
 }
 
+interface ApplicationItem {
+  item: {
+    id: string;
+    status: 'pending' | 'accepted' | 'rejected' | 'canceled';
+  };
+}
+
+interface ApplicationResponse {
+  items: ApplicationItem[];
+}
+
 export default function DetailNotice() {
   const [notice, setNotice] = useState<NoticeDetail | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
+  const [isApplied, setIsApplied] = useState(false);
+  const [modalOpen, setModalOpen] = useState(false);
+  const [modalContent, setModalContent] = useState<string>('');
 
   const params = useParams();
   const shopId = params.shopId as string;
   const noticeId = params.noticeId as string;
 
+  const apiToken = process.env.NEXT_PUBLIC_API_TOKEN;
+
   useEffect(() => {
     if (shopId && noticeId) {
       const fetchNoticeDetail = async () => {
         try {
-          const response = await axios.get(
+          const response = await axios.get<{ item: NoticeDetail }>(
             `https://bootcamp-api.codeit.kr/api/11-2/the-julge/shops/${shopId}/notices/${noticeId}`
           );
           setNotice(response.data.item);
@@ -54,9 +71,110 @@ export default function DetailNotice() {
         }
       };
 
+      const fetchApplicationId = async (): Promise<string | null> => {
+        try {
+          const response = await axios.get<ApplicationResponse>(
+            `https://bootcamp-api.codeit.kr/api/11-2/the-julge/shops/${shopId}/notices/${noticeId}/applications`,
+            {
+              headers: {
+                Authorization: `Bearer ${apiToken}`,
+              },
+            }
+          );
+
+          const application = response.data.items.find((app) => app.item.status !== 'canceled');
+
+          return application ? application.item.id : null;
+        } catch (error) {
+          console.warn('No existing application found:', error);
+          return null;
+        }
+      };
+
+      const initializeApplicationStatus = async () => {
+        try {
+          const applicationId = await fetchApplicationId();
+          if (applicationId) {
+            setIsApplied(true);
+          }
+        } catch (error) {
+          console.error('Error initializing application status:', error);
+        }
+      };
+
       fetchNoticeDetail();
+      initializeApplicationStatus();
     }
-  }, [shopId, noticeId]);
+  }, [shopId, noticeId, apiToken]);
+
+  const handleApply = async () => {
+    try {
+      await axios.post(
+        `https://bootcamp-api.codeit.kr/api/11-2/the-julge/shops/${shopId}/notices/${noticeId}/applications`,
+        {},
+        {
+          headers: {
+            Authorization: `Bearer ${apiToken}`,
+          },
+        }
+      );
+      setIsApplied(true);
+      setModalContent('신청이 완료되었습니다.');
+      setModalOpen(true);
+    } catch (error) {
+      console.error('Error applying:', error);
+      setModalContent('신청 중 오류가 발생했습니다.');
+      setModalOpen(true);
+    }
+  };
+
+  const handleCancel = async () => {
+    try {
+      const fetchApplicationId = async (): Promise<string | null> => {
+        try {
+          const response = await axios.get<ApplicationResponse>(
+            `https://bootcamp-api.codeit.kr/api/11-2/the-julge/shops/${shopId}/notices/${noticeId}/applications`,
+            {
+              headers: {
+                Authorization: `Bearer ${apiToken}`,
+              },
+            }
+          );
+
+          const application = response.data.items.find((app) => app.item.status !== 'canceled');
+
+          return application ? application.item.id : null;
+        } catch (error) {
+          console.warn('No existing application found:', error);
+          return null;
+        }
+      };
+
+      const applicationId = await fetchApplicationId();
+      if (!applicationId) {
+        setModalContent('신청 정보를 찾을 수 없습니다.');
+        setModalOpen(true);
+        return;
+      }
+
+      await axios.put(
+        `https://bootcamp-api.codeit.kr/api/11-2/the-julge/shops/${shopId}/notices/${noticeId}/applications/${applicationId}`,
+        { status: 'canceled' },
+        {
+          headers: {
+            Authorization: `Bearer ${apiToken}`,
+          },
+        }
+      );
+      setIsApplied(false);
+      setModalContent('신청이 취소되었습니다.');
+      setModalOpen(true);
+    } catch (error) {
+      console.error('Error canceling application:', error);
+      setModalContent('취소 중 오류가 발생했습니다.');
+      setModalOpen(true);
+    }
+  };
 
   if (loading) {
     return (
@@ -150,17 +268,17 @@ export default function DetailNotice() {
           <p className="mt-2 text-sm text-gray-black sm:text-base">{notice.description}</p>
           <Button
             className="mt-7 h-[38px] w-full sm:h-[48px] lg:absolute lg:bottom-0 lg:mt-0"
-            onClick={() => !notice.closed && alert('신청 버튼을 클릭하셨습니다.')}
+            onClick={isApplied ? handleCancel : handleApply}
             disabled={notice.closed || isPast}
+            variant={isApplied ? 'reverse' : 'primary'}
           >
-            {notice.closed || isPast ? '신청 불가' : '신청하기'}
+            {notice.closed || isPast ? '신청 불가' : isApplied ? '취소하기' : '신청하기'}
           </Button>
         </div>
       </div>
-      <div className="mt-5 w-full rounded-xl bg-gray-10 p-5 text-sm text-gray-black sm:p-8 sm:text-base">
-        <span className="font-bold">공고설명</span>
-        <p className="mt-2">{notice.shop.item.description}</p>
-      </div>
+      <Modal isOpen={modalOpen} onClose={() => setModalOpen(false)}>
+        {modalContent}
+      </Modal>
     </div>
   );
 }
