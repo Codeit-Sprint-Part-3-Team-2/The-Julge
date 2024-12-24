@@ -9,7 +9,7 @@ import Button from '../../common/Button';
 import LoadingSpinner from '../../common/LoadingSpinner';
 import getDiscountClass from '@/app/utils/getDiscountClass';
 import isPastNotice from '@/app/utils/isPastNotice';
-import Modal from '../../modal/modal';
+import NoticeModal from '../detail/NoticeModal';
 
 interface ShopItem {
   name: string;
@@ -49,6 +49,8 @@ export default function DetailNotice() {
   const [isApplied, setIsApplied] = useState(false);
   const [modalOpen, setModalOpen] = useState(false);
   const [modalContent, setModalContent] = useState<string>('');
+  const [modalVariant, setModalVariant] = useState<'alert' | 'confirm'>('alert');
+  const [onConfirm, setOnConfirm] = useState<() => void>(() => () => {});
 
   const params = useParams();
   const shopId = params.shopId as string;
@@ -108,30 +110,24 @@ export default function DetailNotice() {
   }, [shopId, noticeId, apiToken]);
 
   const handleApply = async () => {
-    try {
-      await axios.post(
-        `https://bootcamp-api.codeit.kr/api/11-2/the-julge/shops/${shopId}/notices/${noticeId}/applications`,
-        {},
-        {
-          headers: {
-            Authorization: `Bearer ${apiToken}`,
-          },
-        }
-      );
-      setIsApplied(true);
-      setModalContent('신청이 완료되었습니다.');
-      setModalOpen(true);
-    } catch (error) {
-      console.error('Error applying:', error);
-      setModalContent('신청 중 오류가 발생했습니다.');
-      setModalOpen(true);
-    }
+    setModalContent('내 프로필을 먼저 등록해 주세요.');
+    setModalVariant('alert');
+    setOnConfirm(() => () => {
+      setModalOpen(false);
+      window.location.href = '/worker/profile';
+    });
+    setModalOpen(true);
   };
 
   const handleCancel = async () => {
-    try {
-      const fetchApplicationId = async (): Promise<string | null> => {
-        try {
+    console.log('모달 열기 전: modalOpen =', modalOpen);
+    setModalContent('신청을 취소하시겠어요?');
+    setModalVariant('confirm');
+
+    setOnConfirm(() => async () => {
+      console.log('onConfirm 실행');
+      try {
+        const fetchApplicationId = async (): Promise<string | null> => {
           const response = await axios.get<ApplicationResponse>(
             `https://bootcamp-api.codeit.kr/api/11-2/the-julge/shops/${shopId}/notices/${noticeId}/applications`,
             {
@@ -140,40 +136,42 @@ export default function DetailNotice() {
               },
             }
           );
-
           const application = response.data.items.find((app) => app.item.status !== 'canceled');
-
           return application ? application.item.id : null;
-        } catch (error) {
-          console.warn('No existing application found:', error);
-          return null;
-        }
-      };
+        };
 
-      const applicationId = await fetchApplicationId();
-      if (!applicationId) {
-        setModalContent('신청 정보를 찾을 수 없습니다.');
-        setModalOpen(true);
-        return;
+        const applicationId = await fetchApplicationId();
+        if (!applicationId) {
+          setModalContent('신청 정보를 찾을 수 없습니다.');
+          setModalVariant('alert');
+          setOnConfirm(() => () => setModalOpen(false));
+          return;
+        }
+
+        await axios.put(
+          `https://bootcamp-api.codeit.kr/api/11-2/the-julge/shops/${shopId}/notices/${noticeId}/applications/${applicationId}`,
+          { status: 'canceled' },
+          {
+            headers: {
+              Authorization: `Bearer ${apiToken}`,
+            },
+          }
+        );
+
+        setIsApplied(false);
+        setModalContent('신청이 취소되었습니다.');
+        setModalVariant('alert');
+        setOnConfirm(() => () => setModalOpen(false));
+      } catch (error) {
+        console.error('Error canceling application:', error);
+        setModalContent('취소 중 오류가 발생했습니다.');
+        setModalVariant('alert');
+        setOnConfirm(() => () => setModalOpen(false));
       }
+    });
 
-      await axios.put(
-        `https://bootcamp-api.codeit.kr/api/11-2/the-julge/shops/${shopId}/notices/${noticeId}/applications/${applicationId}`,
-        { status: 'canceled' },
-        {
-          headers: {
-            Authorization: `Bearer ${apiToken}`,
-          },
-        }
-      );
-      setIsApplied(false);
-      setModalContent('신청이 취소되었습니다.');
-      setModalOpen(true);
-    } catch (error) {
-      console.error('Error canceling application:', error);
-      setModalContent('취소 중 오류가 발생했습니다.');
-      setModalOpen(true);
-    }
+    setModalOpen(true);
+    console.log('모달 열기 후: modalOpen =', modalOpen);
   };
 
   if (loading) {
@@ -276,9 +274,16 @@ export default function DetailNotice() {
           </Button>
         </div>
       </div>
-      <Modal isOpen={modalOpen} onClose={() => setModalOpen(false)}>
-        {modalContent}
-      </Modal>
+      <NoticeModal
+        isOpen={modalOpen}
+        onClose={() => setModalOpen(false)}
+        content={modalContent}
+        confirmText={modalVariant === 'confirm' ? '취소하기' : '확인'}
+        cancelText="아니요"
+        variant={modalVariant}
+        onConfirm={onConfirm}
+        onCancel={() => setModalOpen(false)}
+      />
     </div>
   );
 }
