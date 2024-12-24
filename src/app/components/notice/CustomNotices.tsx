@@ -11,6 +11,7 @@ import axios from 'axios';
 import formatTimeRange from '../../utils/formatTimeRange';
 import { useRecentNoticesStore } from '@/app/stores/useRecentNoticesStore';
 import isPastNotice from '@/app/utils/isPastNotice';
+import LoadingSpinner from '../common/LoadingSpinner';
 
 interface ShopItem {
   id: string;
@@ -39,10 +40,12 @@ interface ApiResponse {
 
 export default function CustomNotices() {
   const [notices, setNotices] = useState<NoticeItem[]>([]);
+  const [loading, setLoading] = useState(true);
   const addNotice = useRecentNoticesStore((state) => state.addNotice);
 
   useEffect(() => {
     const fetchCustomNotices = async () => {
+      setLoading(true);
       try {
         const response = await axios.get<ApiResponse>(
           'https://bootcamp-api.codeit.kr/api/11-2/the-julge/notices?offset=0&limit=20'
@@ -54,11 +57,21 @@ export default function CustomNotices() {
         setNotices(formattedData);
       } catch (error) {
         console.error('Error fetching custom notices:', error);
+      } finally {
+        setLoading(false);
       }
     };
 
     fetchCustomNotices();
   }, []);
+
+  if (loading) {
+    return (
+      <div className="flex h-60 items-center justify-center">
+        <LoadingSpinner />
+      </div>
+    );
+  }
 
   return (
     <Swiper
