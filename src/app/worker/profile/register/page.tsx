@@ -6,8 +6,13 @@ import LayoutWrapper from '@/app/components/worker/LayoutWrapper';
 import Button from '@/app/components/common/Button';
 import DropDownBtn from '@/app/components/common/drop-down';
 import InputField from '@/app/components/worker/InputField';
+import useAuthStore from '@/app/stores/authStore';
+import { useRouter } from 'next/navigation';
 
 const ProfilRegisterePage = () => {
+  const { setProfileRegistered } = useAuthStore();
+  const router = useRouter();
+
   const [name, setName] = useState('');
   const [contact, setContact] = useState('');
   const [region, setRegion] = useState('');
@@ -61,7 +66,12 @@ const ProfilRegisterePage = () => {
       contactInputRef.current?.focus();
       return;
     }
-    alert('신청버튼을 클릭하셨습니다.');
+
+    setProfileRegistered(true); // 프로필 등록 완료 상태 변경
+    alert('등록이 완료되었습니다.');
+    
+    // 프로필 페이지로 리다이렉트
+    router.push('/worker/profile');
   };
 
   const handleClose = () => {
@@ -79,7 +89,6 @@ const ProfilRegisterePage = () => {
 
       <form onSubmit={handleSubmit}>
         <div className="mb-5 grid grid-cols-1 gap-5 sm:mb-6 sm:grid-cols-2 sm:gap-y-6 lg:grid-cols-3">
-
           {/* 이름 */}
           <InputField
             label="이름"
@@ -119,7 +128,7 @@ const ProfilRegisterePage = () => {
 
         {/* 소개 */}
         <div>
-          <label htmlFor="intro">자기소개</label>
+          <label htmlFor="intro">소개</label>
           <textarea
             id="intro"
             name="intro"

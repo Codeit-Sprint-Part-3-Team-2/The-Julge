@@ -30,8 +30,12 @@ export interface AuthStore {
   type: 'employee' | 'employer' | null;
   token: string | null;
   profileRegistered: boolean | null;
+  isInitialized: boolean;
+  setProfileRegistered: (status: boolean) => void;
+
   getMe: () => void;
   signup: (data: Auth) => Promise<AuthResponse>;
   login: (data: Auth) => Promise<AuthResponse>;
   logout: () => void;
+  initialize: () => void;
 }
