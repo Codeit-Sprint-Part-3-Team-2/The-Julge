@@ -73,10 +73,6 @@ export default function AllNotices({
     getNotices();
   }, [currentPage, itemsPerPage, setTotalItems, sortOption, filterOptions, query]);
 
-  if (notices.length === 0) {
-    return <div className="text-center text-gray-40">해당하는 공고 목록이 존재하지 않아요.</div>;
-  }
-
   if (loading) {
     return (
       <div className="flex h-60 items-center justify-center">
@@ -120,8 +116,8 @@ export default function AllNotices({
         })
       ) : (
         <div className="col-span-2 flex flex-col items-center justify-center lg:col-span-3">
-          <p className="text-lg text-gray-black">해당 조건에 맞는 공고가 없습니다.</p>
-          <p className="text-sm text-orange">필터를 다시 설정해보세요!</p>
+          <p className="mt-10 text-lg text-gray-black">해당 조건에 맞는 공고가 없습니다.</p>
+          <p className="text-sm text-orange">검색어와 필터를 다시 설정해보세요!</p>
         </div>
       )}
     </div>
