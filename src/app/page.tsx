@@ -37,7 +37,7 @@ export default function Posts() {
   };
 
   return (
-    <div>
+    <div className="min-h-[500px]">
       <div className="bg-red-10">
         <div className={`sm:pt-14 ${container}`}>
           <h2 className="mb-5 text-xl font-bold text-gray-black sm:text-[28px]">맞춤 공고</h2>
@@ -45,10 +45,10 @@ export default function Posts() {
         </div>
       </div>
 
-      <div className={`${container} mb-8 flex flex-col lg:mb-0`}>
+      <div className={`${container} mb-8 flex min-h-[400px] flex-col lg:mb-0`}>
         <div className={`mb-5 sm:flex sm:items-center sm:justify-between`}>
           <h2 className="text-xl font-bold text-gray-black sm:text-[28px]">전체 공고</h2>
-          <div className="mt-12 flex items-center gap-3">
+          <div className="mt-4 flex items-center gap-3 sm:mt-0">
             <NoticeDropdown
               onChange={(selectedSort) => {
                 setSortOption(selectedSort);

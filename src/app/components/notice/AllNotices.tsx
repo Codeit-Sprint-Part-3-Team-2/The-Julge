@@ -68,6 +68,10 @@ export default function AllNotices({
     getNotices();
   }, [currentPage, itemsPerPage, setTotalItems, sortOption, filterOptions, query]);
 
+  if (notices.length === 0) {
+    return <div className="text-center text-gray-40">해당하는 공고 목록이 존재하지 않아요.</div>;
+  }
+
   return (
     <div className="grid grid-cols-2 gap-4 lg:grid-cols-3">
       {notices.map((notice) => {

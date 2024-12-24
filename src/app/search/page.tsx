@@ -40,29 +40,31 @@ export default function Search() {
   };
 
   return (
-    <div className={`${container} mb-8 flex flex-col lg:mb-0`}>
-      <div className={`mb-5 sm:flex sm:items-center sm:justify-between`}>
-        <h2 className="text-xl font-bold text-gray-black sm:text-[28px]">
-          <span className="text-orange">{query}</span>에 대한 공고 목록
-        </h2>
-        <div className="mt-12 flex items-center gap-3">
-          <NoticeDropdown
-            onChange={(selectedSort) => {
-              setSortOption(selectedSort);
-              setCurrentPage(1);
-            }}
-          />
-          <DetailedFilter onFilterChange={handleFilterChange} />
+    <div>
+      <div className={`${container} mb-8 flex min-h-[300px] flex-col lg:mb-0`}>
+        <div className={`mb-5 sm:flex sm:items-center sm:justify-between`}>
+          <h2 className="text-xl font-bold text-gray-black sm:text-[28px]">
+            <span className="text-orange">{query}</span>에 대한 공고 목록
+          </h2>
+          <div className="mt-4 flex items-center gap-3 sm:mt-0">
+            <NoticeDropdown
+              onChange={(selectedSort) => {
+                setSortOption(selectedSort);
+                setCurrentPage(1);
+              }}
+            />
+            <DetailedFilter onFilterChange={handleFilterChange} />
+          </div>
         </div>
+        <AllNotices
+          currentPage={currentPage}
+          itemsPerPage={itemsPerPage}
+          setTotalItems={setTotalItems}
+          sortOption={formatSortToApi(sortOption)}
+          filterOptions={filterOptions}
+          query={query}
+        />
       </div>
-      <AllNotices
-        currentPage={currentPage}
-        itemsPerPage={itemsPerPage}
-        setTotalItems={setTotalItems}
-        sortOption={formatSortToApi(sortOption)}
-        filterOptions={filterOptions}
-        query={query}
-      />
       <Pagination
         totalItems={totalItems}
         itemsPerPage={itemsPerPage}
