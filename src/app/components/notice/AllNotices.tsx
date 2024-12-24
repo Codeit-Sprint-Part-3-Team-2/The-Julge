@@ -5,6 +5,7 @@ import Card from '../common/Card';
 import formatTimeRange from '@/app/utils/formatTimeRange';
 import { fetchNotices } from '@/app/api/noticeApi';
 import { useRecentNoticesStore } from '@/app/stores/useRecentNoticesStore';
+import isPastNotice from '@/app/utils/isPastNotice';
 
 interface ShopItem {
   id: string;
@@ -73,6 +74,8 @@ export default function AllNotices({
           100
         ).toFixed(0);
 
+        const isPast = isPastNotice(notice.startsAt);
+
         return (
           <div key={notice.id} className="w-44 sm:w-[312px]">
             <Card
@@ -86,6 +89,8 @@ export default function AllNotices({
               noticeId={notice.id}
               shopId={notice.shopId}
               onClick={() => addNotice(notice)}
+              closed={notice.closed}
+              past={isPast}
             />
           </div>
         );

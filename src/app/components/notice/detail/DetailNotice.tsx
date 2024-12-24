@@ -7,6 +7,7 @@ import { useParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import Button from '../../common/Button';
 import getDiscountClass from '@/app/utils/getDiscountClass';
+import isPastNotice from '@/app/utils/isPastNotice';
 
 interface ShopItem {
   name: string;
@@ -62,6 +63,8 @@ export default function DetailNotice() {
 
   const contentStyle = 'flex items-center gap-1 text-sm text-gray-50 sm:text-base';
 
+  const isPast = isPastNotice(notice.startsAt);
+
   return (
     <div>
       <div className="mb-4">
@@ -74,6 +77,13 @@ export default function DetailNotice() {
       </div>
       <div className="h-auto w-full rounded-xl border border-gray-20 bg-white p-5 lg:flex lg:h-[356px] lg:w-[963px] lg:p-7">
         <div className="relative h-44 w-full sm:h-[360px] lg:h-[308px] lg:w-[540px]">
+          {(notice.closed || isPast) && (
+            <div className="absolute inset-0 z-10 flex items-center justify-center rounded-xl bg-black bg-opacity-70">
+              <span className="text-xl font-bold text-gray-30 sm:text-[28px]">
+                {notice.closed ? '마감 완료' : '지난 공고'}
+              </span>
+            </div>
+          )}
           <Image
             src={notice.shop.item.imageUrl}
             alt={notice.shop.item.name}
@@ -122,9 +132,10 @@ export default function DetailNotice() {
           <p className="mt-2 text-sm text-gray-black sm:text-base">{notice.description}</p>
           <Button
             className="mt-7 h-[38px] w-full sm:h-[48px] lg:absolute lg:bottom-0 lg:mt-0"
-            onClick={() => alert('신청버튼을 클릭하셨습니다.')}
+            onClick={() => !notice.closed && alert('신청 버튼을 클릭하셨습니다.')}
+            disabled={notice.closed || isPast}
           >
-            신청하기
+            {notice.closed || isPast ? '신청 불가' : '신청하기'}
           </Button>
         </div>
       </div>
