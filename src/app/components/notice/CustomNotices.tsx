@@ -10,6 +10,7 @@ import Card from '../common/Card';
 import axios from 'axios';
 import formatTimeRange from '../../utils/formatTimeRange';
 import { useRecentNoticesStore } from '@/app/stores/useRecentNoticesStore';
+import LoadingSpinner from '../common/LoadingSpinner';
 
 interface ShopItem {
   id: string;
@@ -38,14 +39,16 @@ interface ApiResponse {
 
 export default function CustomNotices() {
   const [notices, setNotices] = useState<NoticeItem[]>([]);
+  const [loading, setLoading] = useState(true);
   const addNotice = useRecentNoticesStore((state) => state.addNotice);
 
   useEffect(() => {
     const fetchCustomNotices = async () => {
+      setLoading(true);
       try {
         const response = await axios.get<ApiResponse>(
           'https://bootcamp-api.codeit.kr/api/11-2/the-julge/notices?offset=0&limit=10'
-        ); // 맞춤공고는 현재 데이터를 10개 받아오는데 설정한 "지역"을 기준으로 불러오게 로직을 변경할 예정입니다.
+        ); // 맞춤공고는 현재 데이터를 10개 받아오는데 후에 로직 변경 예정입니다.
         const formattedData = response.data.items.map((data) => ({
           ...data.item,
           shopId: data.item.shop.item.id,
@@ -53,11 +56,21 @@ export default function CustomNotices() {
         setNotices(formattedData);
       } catch (error) {
         console.error('Error fetching custom notices:', error);
+      } finally {
+        setLoading(false);
       }
     };
 
     fetchCustomNotices();
   }, []);
+
+  if (loading) {
+    return (
+      <div className="flex h-60 items-center justify-center">
+        <LoadingSpinner />
+      </div>
+    );
+  }
 
   return (
     <Swiper

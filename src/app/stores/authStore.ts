@@ -79,6 +79,12 @@ const useAuthStore = create<AuthStore>()(
           throw new Error('로그인 후 사용자 정보를 가져오지 못했습니다.');
         }
 
+        try {
+          await get().getMe();
+        } catch (error) {
+          console.error('로그인 후 getMe 실패:', error);
+          throw new Error('로그인 후 사용자 정보를 가져오지 못했습니다.');
+        }
         return response.data;
       },
 

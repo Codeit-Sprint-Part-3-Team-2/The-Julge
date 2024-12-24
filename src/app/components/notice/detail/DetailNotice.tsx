@@ -6,6 +6,7 @@ import Image from 'next/image';
 import { useParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import Button from '../../common/Button';
+import LoadingSpinner from '../../common/LoadingSpinner';
 import getDiscountClass from '@/app/utils/getDiscountClass';
 
 interface ShopItem {
@@ -31,6 +32,7 @@ interface NoticeDetail {
 
 export default function DetailNotice() {
   const [notice, setNotice] = useState<NoticeDetail | null>(null);
+  const [loading, setLoading] = useState<boolean>(true);
 
   const params = useParams();
   const shopId = params.shopId as string;
@@ -46,6 +48,8 @@ export default function DetailNotice() {
           setNotice(response.data.item);
         } catch (error) {
           console.error('Error fetching notice details:', error);
+        } finally {
+          setLoading(false);
         }
       };
 
@@ -53,7 +57,21 @@ export default function DetailNotice() {
     }
   }, [shopId, noticeId]);
 
-  if (!notice) return <div>Loading...</div>;
+  if (loading) {
+    return (
+      <div className="flex h-60 items-center justify-center">
+        <LoadingSpinner />
+      </div>
+    );
+  }
+
+  if (!notice) {
+    return (
+      <div className="flex h-60 items-center justify-center">
+        <p>공고 정보를 불러오는 중입니다...</p>
+      </div>
+    );
+  }
 
   const increaseRate = (
     ((notice.hourlyPay - notice.shop.item.originalHourlyPay) / notice.shop.item.originalHourlyPay) *
