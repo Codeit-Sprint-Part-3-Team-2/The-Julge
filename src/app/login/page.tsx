@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import { useForm, SubmitHandler } from 'react-hook-form';
 import { useRouter } from 'next/navigation';
+import useAuthStore from '../stores/authStore';
 import axios from 'axios';
 import Image from 'next/image';
 import Modal from '../components/modal/modal';
@@ -37,8 +38,13 @@ function LoginPage() {
       const response = await axios.post(BASE_URL, { email: email, password: password });
 
       if (response.status === 200) {
-        const accessToken = response?.data?.item?.token;
+        const { accessToken, type } = response.data.item; // type: 'employee' or 'employer'
         localStorage.setItem('accessToken', accessToken);
+
+        // Zustand 상태 업데이트
+        useAuthStore.getState().setToken(accessToken);
+        useAuthStore.getState().setUserType(type);
+
         router.push('/');
       }
     } catch (error) {
