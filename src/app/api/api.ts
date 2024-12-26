@@ -137,13 +137,13 @@ const putNoticeApplication = async (
 const putShopNotice = async (
   token: string,
   shopId: string,
-  noticeId: string,
   data: {
     hourlyPay: number;
     startsAt: string;
     workhour: number;
     description: string;
-  }
+  },
+  noticeId: string
 ) => {
   const response = await instance.put(`/shops/${shopId}/notices/${noticeId}`, data, {
     headers: {
