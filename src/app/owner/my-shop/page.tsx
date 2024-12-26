@@ -5,7 +5,7 @@ import useAuthStore from '@/app/stores/authStore';
 import { getMyShop, getShopNotices } from '@/app/api/api';
 import { useEffect, useCallback, useState } from 'react';
 import { Shop, Notice } from '@/app/types/Shop';
-import MyShop from '@/app/components/my-shop/MyShop';
+import MyShop from '@/app/components/my-shop/myShop';
 import NoticeCard from '@/app/components/my-shop/NoticeCard';
 
 interface NoticeItem {

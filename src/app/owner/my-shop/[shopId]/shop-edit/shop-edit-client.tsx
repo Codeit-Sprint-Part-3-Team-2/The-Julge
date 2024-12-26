@@ -6,24 +6,15 @@ import { editShop, getShopDetails } from '@/app/api/register-api';
 import ShopCommonForm from '@/app/components/shop/shop-form';
 import Modal from '@/app/components/modal/modal';
 import ShopFormSkeleton from '@/app/components/shop/skeleton/shop-form-skeleton';
-
-interface ShopFormData {
-  name: string;
-  category: string;
-  address1: string;
-  address2: string;
-  originalHourlyPay: number;
-  imageUrl?: string;
-  description: string;
-}
+import { useModalShopStore } from '@/app/stores/modal-shop-store';
+import { ShopFormData } from '@/app/types/ShopFormData';
 
 export default function ShopEditClient() {
   const router = useRouter();
   const { shopId } = useParams<{ shopId: string }>();
   const [shopDetails, setShopDetails] = useState<ShopFormData | null>(null);
-  const [modalOpen, setModalOpen] = useState(false);
-  const [modalMessage, setModalMessage] = useState('');
-  const [redirectPath, setRedirectPath] = useState('');
+  const { modalOpen, modalMessage, redirectPath, setModalOpen, setModalMessage, setRedirectPath } =
+    useModalShopStore();
 
   useEffect(() => {
     if (!shopId) {

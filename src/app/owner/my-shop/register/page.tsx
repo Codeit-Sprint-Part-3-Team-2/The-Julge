@@ -1,25 +1,17 @@
 'use client';
-import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { registerShop } from '@/app/api/register-api';
 import ShopCommonForm from '@/app/components/shop/shop-form';
 import Modal from '@/app/components/modal/modal';
+import { useModalShopStore } from '@/app/stores/modal-shop-store';
+import { ShopFormData } from '@/app/types/ShopFormData';
 
 export default function ShopRegisterPage() {
   const router = useRouter();
-  const [modalOpen, setModalOpen] = useState(false);
-  const [modalMessage, setModalMessage] = useState('');
-  const [redirectPath, setRedirectPath] = useState('');
+  const { modalOpen, modalMessage, redirectPath, setModalOpen, setModalMessage, setRedirectPath } =
+    useModalShopStore();
 
-  const handleRegisterSubmit = async (formData: {
-    name: string;
-    category: string;
-    address1: string;
-    address2: string;
-    originalHourlyPay: number;
-    imageUrl?: string;
-    description: string;
-  }) => {
+  const handleRegisterSubmit = async (formData: ShopFormData) => {
     console.log('폼 데이터 확인:', formData);
     try {
       const result = await registerShop(formData);

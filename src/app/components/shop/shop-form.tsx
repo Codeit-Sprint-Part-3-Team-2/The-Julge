@@ -1,21 +1,13 @@
 'use client';
 import Link from 'next/link';
 import Image from 'next/image';
-import DropDownBtn from '../common/drop-down';
-import Button from '../common/Button';
-import { useState } from 'react';
+import DropDownBtn from '@/app/components/common/drop-down';
+import Button from '@/app/components/common/Button';
+import { useShopStore } from '@/app/stores/shop-form-store';
 import { shopFromCategories, seoulLocation } from '@/app/constants/shop-form-constants';
 import { presignedImg, uploadToS3 } from '@/app/api/register-api';
-
-interface ShopFormData {
-  name: string;
-  category: string;
-  address1: string;
-  address2: string;
-  originalHourlyPay: number;
-  imageUrl?: string;
-  description: string;
-}
+import { ShopFormData } from '@/app/types/ShopFormData';
+import { useEffect } from 'react';
 
 export default function ShopCommonForm({
   mode = 'create',
@@ -26,17 +18,40 @@ export default function ShopCommonForm({
   initialData?: ShopFormData;
   onSubmit: (formData: ShopFormData) => void;
 }) {
-  const [file, setFile] = useState<File | null>(null); // 파일 상태
-  const [name, setName] = useState(initialData?.name || '');
-  const [category, setCategory] = useState(initialData?.category || '');
-  const [address1, setAddress1] = useState(initialData?.address1 || '');
-  const [address2, setAddress2] = useState(initialData?.address2 || '');
-  const [originalHourlyPay, setOriginalHourlyPay] = useState<number>(
-    initialData?.originalHourlyPay || 0
-  );
-  const [description, setDescription] = useState(initialData?.description || '');
-  const [previewUrl, setPreviewUrl] = useState(initialData?.imageUrl || null);
+  const {
+    name,
+    category,
+    address1,
+    address2,
+    originalHourlyPay,
+    description,
+    previewUrl,
+    file,
+    setName,
+    setCategory,
+    setAddress1,
+    setAddress2,
+    setOriginalHourlyPay,
+    setDescription,
+    setFile,
+    setPreviewUrl,
+    clearImage,
+  } = useShopStore();
 
+  // 편집 모드일 때 초기 데이터 설정
+  useEffect(() => {
+    if (mode === 'edit' && initialData) {
+      setName(initialData.name);
+      setCategory(initialData.category);
+      setAddress1(initialData.address1);
+      setAddress2(initialData.address2);
+      setOriginalHourlyPay(initialData.originalHourlyPay);
+      setDescription(initialData.description);
+      setPreviewUrl(initialData.imageUrl || '');
+    }
+  }, [mode, initialData]);
+
+  // 폼 유효성 검사
   const isFormValid =
     name.trim() !== '' &&
     category.trim() !== '' &&
@@ -44,6 +59,7 @@ export default function ShopCommonForm({
     address2.trim() !== '' &&
     originalHourlyPay > 0;
 
+  // 드롭다운 통합
   const renderDropDown = (
     id: string,
     categories: string[],
@@ -58,10 +74,12 @@ export default function ShopCommonForm({
     />
   );
 
+  // 카테고리 선택 핸들러
   const handleCategorySelect = (shopFromCategories: string) => {
     setCategory(shopFromCategories);
   };
 
+  // 주소 선택 핸들러
   const handleAddressCategorySelect = (address1: string) => {
     setAddress1(address1);
   };
@@ -72,7 +90,6 @@ export default function ShopCommonForm({
     if (selectedFile) {
       setFile(selectedFile);
 
-      // 파일 URL을 생성하여 미리보기
       const fileUrl = URL.createObjectURL(selectedFile);
       setPreviewUrl(fileUrl);
     }
@@ -80,18 +97,19 @@ export default function ShopCommonForm({
 
   // 이미지 삭제 처리
   const handleRemoveImage = () => {
-    setFile(null); // 파일 상태 초기화
-    setPreviewUrl(null); // 미리보기 상태 초기화
+    clearImage();
   };
 
+  // 시급 입력 처리
   const handleWageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const input = e.target.value.replace(/,/g, ''); // 숫자만 남기기
+    const input = e.target.value.replace(/,/g, '');
     if (input === '' || /^\d*$/.test(input)) {
-      const numericValue = input ? parseInt(input, 10) : 0; // 입력값을 숫자로 변환
-      setOriginalHourlyPay(numericValue); // 숫자로 상태 설정
+      const numericValue = input ? parseInt(input, 10) : 0;
+      setOriginalHourlyPay(numericValue);
     }
   };
 
+  // 폼 제출 처리
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!isFormValid) {
@@ -100,10 +118,9 @@ export default function ShopCommonForm({
     }
 
     try {
-      let imageUrl = initialData?.imageUrl; // 기존 이미지 URL 사용
+      let imageUrl = initialData?.imageUrl;
 
       if (file) {
-        // 새 이미지가 선택된 경우에만 업로드 로직 실행
         const presignedUrl: string = await presignedImg(file.name);
         const uploadedUrl = await uploadToS3(presignedUrl, file);
         imageUrl = uploadedUrl.split('?')[0];
