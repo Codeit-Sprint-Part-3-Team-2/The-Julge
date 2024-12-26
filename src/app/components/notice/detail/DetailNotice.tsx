@@ -1,7 +1,6 @@
 'use client';
 
 import formatTimeRange from '@/app/utils/formatTimeRange';
-import axios from 'axios';
 import Image from 'next/image';
 import { useParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
@@ -10,8 +9,15 @@ import LoadingSpinner from '../../common/LoadingSpinner';
 import getDiscountClass from '@/app/utils/getDiscountClass';
 import isPastNotice from '@/app/utils/isPastNotice';
 import NoticeModal from '../detail/NoticeModal';
+import {
+  fetchNoticeDetail,
+  fetchApplicationId,
+  applyForNotice,
+  cancelApplication,
+} from '@/app/api/noticeApi';
 
 interface ShopItem {
+  id: string;
   name: string;
   address1: string;
   imageUrl: string;
@@ -32,17 +38,6 @@ interface NoticeDetail {
   };
 }
 
-interface ApplicationItem {
-  item: {
-    id: string;
-    status: 'pending' | 'accepted' | 'rejected' | 'canceled';
-  };
-}
-
-interface ApplicationResponse {
-  items: ApplicationItem[];
-}
-
 export default function DetailNotice() {
   const [notice, setNotice] = useState<NoticeDetail | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
@@ -56,91 +51,54 @@ export default function DetailNotice() {
   const shopId = params.shopId as string;
   const noticeId = params.noticeId as string;
 
-  const apiToken = process.env.NEXT_PUBLIC_API_TOKEN;
-
   useEffect(() => {
     if (shopId && noticeId) {
-      const fetchNoticeDetail = async () => {
+      const initializeNotice = async () => {
         try {
-          const response = await axios.get<{ item: NoticeDetail }>(
-            `https://bootcamp-api.codeit.kr/api/11-2/the-julge/shops/${shopId}/notices/${noticeId}`
-          );
-          setNotice(response.data.item);
+          const noticeData = await fetchNoticeDetail(shopId, noticeId);
+          setNotice(noticeData);
+
+          const applicationId = await fetchApplicationId(shopId, noticeId);
+          if (applicationId) {
+            setIsApplied(true);
+          }
         } catch (error) {
-          console.error('Error fetching notice details:', error);
+          console.error('Error initializing notice:', error);
         } finally {
           setLoading(false);
         }
       };
 
-      const fetchApplicationId = async (): Promise<string | null> => {
-        try {
-          const response = await axios.get<ApplicationResponse>(
-            `https://bootcamp-api.codeit.kr/api/11-2/the-julge/shops/${shopId}/notices/${noticeId}/applications`,
-            {
-              headers: {
-                Authorization: `Bearer ${apiToken}`,
-              },
-            }
-          );
-
-          const application = response.data.items.find((app) => app.item.status !== 'canceled');
-
-          return application ? application.item.id : null;
-        } catch (error) {
-          console.warn('No existing application found:', error);
-          return null;
-        }
-      };
-
-      const initializeApplicationStatus = async () => {
-        try {
-          const applicationId = await fetchApplicationId();
-          if (applicationId) {
-            setIsApplied(true);
-          }
-        } catch (error) {
-          console.error('Error initializing application status:', error);
-        }
-      };
-
-      fetchNoticeDetail();
-      initializeApplicationStatus();
+      initializeNotice();
     }
-  }, [shopId, noticeId, apiToken]);
+  }, [shopId, noticeId]);
 
+  /* 아래 코드는 후에 프로필 로직을 정민님이 완성하시면 프로필이 있는 지 
+  확인하고 없다면 리다이렉트 시키는 로직을 추가할 예정입니다.
+   */
   const handleApply = async () => {
-    setModalContent('내 프로필을 먼저 등록해 주세요.');
-    setModalVariant('alert');
-    setOnConfirm(() => () => {
-      setModalOpen(false);
-      window.location.href = '/worker/profile';
-    });
-    setModalOpen(true);
+    try {
+      await applyForNotice(shopId, noticeId);
+      setIsApplied(true);
+      setModalContent('신청이 완료되었습니다.');
+      setModalVariant('alert');
+      setOnConfirm(() => () => setModalOpen(false));
+      setModalOpen(true);
+    } catch (error) {
+      console.error('Error applying:', error);
+      setModalContent('신청 중 오류가 발생했습니다.');
+      setModalVariant('alert');
+      setOnConfirm(() => () => setModalOpen(false));
+      setModalOpen(true);
+    }
   };
 
   const handleCancel = async () => {
-    console.log('모달 열기 전: modalOpen =', modalOpen);
     setModalContent('신청을 취소하시겠어요?');
     setModalVariant('confirm');
-
     setOnConfirm(() => async () => {
-      console.log('onConfirm 실행');
       try {
-        const fetchApplicationId = async (): Promise<string | null> => {
-          const response = await axios.get<ApplicationResponse>(
-            `https://bootcamp-api.codeit.kr/api/11-2/the-julge/shops/${shopId}/notices/${noticeId}/applications`,
-            {
-              headers: {
-                Authorization: `Bearer ${apiToken}`,
-              },
-            }
-          );
-          const application = response.data.items.find((app) => app.item.status !== 'canceled');
-          return application ? application.item.id : null;
-        };
-
-        const applicationId = await fetchApplicationId();
+        const applicationId = await fetchApplicationId(shopId, noticeId);
         if (!applicationId) {
           setModalContent('신청 정보를 찾을 수 없습니다.');
           setModalVariant('alert');
@@ -148,16 +106,7 @@ export default function DetailNotice() {
           return;
         }
 
-        await axios.put(
-          `https://bootcamp-api.codeit.kr/api/11-2/the-julge/shops/${shopId}/notices/${noticeId}/applications/${applicationId}`,
-          { status: 'canceled' },
-          {
-            headers: {
-              Authorization: `Bearer ${apiToken}`,
-            },
-          }
-        );
-
+        await cancelApplication(shopId, noticeId, applicationId);
         setIsApplied(false);
         setModalContent('신청이 취소되었습니다.');
         setModalVariant('alert');
@@ -168,10 +117,9 @@ export default function DetailNotice() {
         setModalVariant('alert');
         setOnConfirm(() => () => setModalOpen(false));
       }
+      setModalOpen(true);
     });
-
     setModalOpen(true);
-    console.log('모달 열기 후: modalOpen =', modalOpen);
   };
 
   if (loading) {
@@ -279,7 +227,7 @@ export default function DetailNotice() {
         onClose={() => setModalOpen(false)}
         content={modalContent}
         confirmText={modalVariant === 'confirm' ? '취소하기' : '확인'}
-        cancelText="아니요"
+        cancelText="아니오"
         variant={modalVariant}
         onConfirm={onConfirm}
         onCancel={() => setModalOpen(false)}

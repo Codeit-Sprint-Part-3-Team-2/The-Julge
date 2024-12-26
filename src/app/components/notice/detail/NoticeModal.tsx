@@ -31,21 +31,17 @@ const NoticeModal: React.FC<NoticeModalProps> = ({
       <div className="h-[184px] w-[298px] rounded-lg bg-white p-6 shadow-lg">
         <div className="mb-5 flex justify-center">
           <div className="flex h-6 w-6 items-center justify-center rounded-full bg-orange">
-            <span className="text-lg font-bold text-white">{icon}</span>
+            <span className="text-lg text-white">{icon}</span>
           </div>
         </div>
         <div className="text-center text-base text-gray-black">{content}</div>
-        <div className="mt-6 flex justify-center space-x-4">
+        <div className="mt-7 flex justify-center space-x-4">
           {variant === 'confirm' && (
-            <Button
-              variant="primary"
-              onClick={onCancel}
-              className="w-28 border border-gray-300 text-gray-black"
-            >
+            <Button variant="reverse" onClick={onCancel} className="w-20">
               {cancelText}
             </Button>
           )}
-          <Button variant="reverse" onClick={onConfirm || onClose} className="h-[38px] w-20">
+          <Button variant="primary" onClick={onConfirm || onClose} className="h-[38px] w-20">
             {confirmText}
           </Button>
         </div>
