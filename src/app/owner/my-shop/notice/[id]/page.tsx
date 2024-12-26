@@ -58,8 +58,6 @@ export default function NoticePage() {
     return <div className="my-10 text-center">접근 권한이 없습니다.</div>;
   }
 
-  console.log(page);
-
   return (
     <>
       <div className="container">

@@ -1,20 +1,20 @@
 import Button from '../common/Button';
-import useModalStore from '@/app/stores/modalStore';
 import Image from 'next/image';
 
-export default function NoticeRegisterModal({
-  content,
-  onClick,
-}: {
-  content: string;
-  onClick: () => Promise<void>;
-}) {
-  const { closeModal } = useModalStore();
+interface ModalProps {
+  isOpen: boolean;
+  onClick: () => void;
+  onClose: () => void;
+  children: React.ReactNode;
+}
 
+export default function NoticeRegisterModal({ isOpen, onClick, onClose, children }: ModalProps) {
   const handleOnClick = async () => {
     await onClick();
-    closeModal();
+    onClose();
   };
+
+  if (!isOpen) return null;
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-10">
@@ -23,10 +23,10 @@ export default function NoticeRegisterModal({
           <div className="relative h-6 w-6">
             <Image fill src="/my-shop/modal-check.svg" alt="체크" sizes="(max-width: 640px) 24px" />
           </div>
-          <span className="text-base font-normal text-black">{content}</span>
+          <span className="text-base font-normal text-black">{children}</span>
         </div>
         <div className="flex justify-center gap-2">
-          <Button onClick={closeModal} className="h-9 w-20 rounded-md" variant="reverse">
+          <Button onClick={onClose} className="h-9 w-20 rounded-md" variant="reverse">
             아니오
           </Button>
           <Button
