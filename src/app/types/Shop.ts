@@ -1,3 +1,13 @@
+export interface user {
+  id: string;
+  email: string;
+  type: 'employee' | 'employer';
+  name?: string;
+  phone?: string;
+  address?: string;
+  bio?: string;
+}
+
 export interface Shop {
   id: string;
   name: string;
@@ -7,24 +17,25 @@ export interface Shop {
   description: string;
   imageUrl: string;
   originalHourlyPay: number;
+  user: {
+    item: user;
+    href: string;
+  };
 }
 
 export interface Notice {
-  item: {
-    id: string;
-    hourlyPay: number;
-    startsAt: string;
-    workhour: number;
-    description: string;
-    closed: boolean;
-  };
+  id: string;
+  hourlyPay: number;
+  startsAt: string;
+  workhour: number;
+  description: string;
+  closed: boolean;
 }
 
 export interface currentUserApplication {
-  item: {
-    id: string;
-    status: 'pending' | 'accepted' | 'rejected' | 'canceled';
-  };
+  id: string;
+  status: 'pending' | 'accepted' | 'rejected' | 'canceled';
+  createdAt: string;
 }
 
 export interface NoticeDetail {
@@ -38,5 +49,47 @@ export interface NoticeDetail {
     item: Shop;
     href: string;
   };
-  currentUserApplication: currentUserApplication;
+  currentUserApplication: {
+    item: currentUserApplication;
+  };
+}
+
+export interface NoticeApplication {
+  item: {
+    id: string;
+    createdAt: string;
+    status: 'pending' | 'accepted' | 'rejected' | 'canceled';
+    user: {
+      item: user;
+      href: string;
+    };
+    shop: {
+      item: Shop;
+      href: string;
+    };
+    notice: {
+      item: Notice;
+      href: string;
+    };
+  };
+}
+
+export interface PostNotice {
+  hourlyPay: number;
+  startsAt: string;
+  workhour: number;
+  description: string;
+}
+
+export interface PostNoticeResponse {
+  id: string;
+  hourlyPay: number;
+  startsAt: string;
+  workhour: number;
+  description: string;
+  closed: boolean;
+  shop: {
+    item: Shop;
+    href: string;
+  };
 }

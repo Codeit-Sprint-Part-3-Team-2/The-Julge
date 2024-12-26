@@ -95,7 +95,7 @@ export default function AllNotices({
                 date={notice.startsAt.split('T')[0]}
                 hours={formatTimeRange(notice.startsAt, notice.workhour)}
                 location={notice.shop.item.address1}
-                price={`${notice.hourlyPay.toLocaleString()}원`}
+                price={`${Number(notice.hourlyPay).toLocaleString()}원`}
                 discount={
                   parseFloat(increaseRate) > 0 ? `기존 시급보다 ${increaseRate}%` : undefined
                 }

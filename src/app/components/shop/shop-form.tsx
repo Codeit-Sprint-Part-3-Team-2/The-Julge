@@ -1,21 +1,13 @@
 'use client';
 import Link from 'next/link';
 import Image from 'next/image';
-import DropDownBtn from '../common/drop-down';
-import Button from '../common/Button';
-import { useState } from 'react';
+import DropDownBtn from '@/app/components/common/drop-down';
+import Button from '@/app/components/common/Button';
+import { useShopStore } from '@/app/stores/shop-form-store';
 import { shopFromCategories, seoulLocation } from '@/app/constants/shop-form-constants';
 import { presignedImg, uploadToS3 } from '@/app/api/register-api';
-
-interface ShopFormData {
-  name: string;
-  category: string;
-  address1: string;
-  address2: string;
-  originalHourlyPay: number;
-  imageUrl?: string;
-  description: string;
-}
+import { ShopFormData } from '@/app/types/ShopFormData';
+import { useEffect } from 'react';
 
 export default function ShopCommonForm({
   mode = 'create',
@@ -23,28 +15,43 @@ export default function ShopCommonForm({
   onSubmit,
 }: {
   mode?: 'create' | 'edit';
-  initialData?: {
-    name?: string;
-    category?: string;
-    address1?: string;
-    address2?: string;
-    originalHourlyPay?: number;
-    description?: string;
-    previewUrl?: string;
-  };
+  initialData?: ShopFormData;
   onSubmit: (formData: ShopFormData) => void;
 }) {
-  const [file, setFile] = useState<File | null>(null); // 파일 상태
-  const [name, setName] = useState(initialData?.name || '');
-  const [category, setCategory] = useState(initialData?.category || '');
-  const [address1, setAddress1] = useState(initialData?.address1 || '');
-  const [address2, setAddress2] = useState(initialData?.address2 || '');
-  const [originalHourlyPay, setOriginalHourlyPay] = useState<number>(
-    initialData?.originalHourlyPay || 0
-  );
-  const [description, setDescription] = useState(initialData?.description || '');
-  const [previewUrl, setPreviewUrl] = useState(initialData?.previewUrl || null);
+  const {
+    name,
+    category,
+    address1,
+    address2,
+    originalHourlyPay,
+    description,
+    previewUrl,
+    file,
+    setName,
+    setCategory,
+    setAddress1,
+    setAddress2,
+    setOriginalHourlyPay,
+    setDescription,
+    setFile,
+    setPreviewUrl,
+    clearImage,
+  } = useShopStore();
 
+  // 편집 모드일 때 초기 데이터 설정
+  useEffect(() => {
+    if (mode === 'edit' && initialData) {
+      setName(initialData.name);
+      setCategory(initialData.category);
+      setAddress1(initialData.address1);
+      setAddress2(initialData.address2);
+      setOriginalHourlyPay(initialData.originalHourlyPay);
+      setDescription(initialData.description);
+      setPreviewUrl(initialData.imageUrl || '');
+    }
+  }, [mode, initialData]);
+
+  // 폼 유효성 검사
   const isFormValid =
     name.trim() !== '' &&
     category.trim() !== '' &&
@@ -52,6 +59,7 @@ export default function ShopCommonForm({
     address2.trim() !== '' &&
     originalHourlyPay > 0;
 
+  // 드롭다운 통합
   const renderDropDown = (
     id: string,
     categories: string[],
@@ -66,10 +74,12 @@ export default function ShopCommonForm({
     />
   );
 
+  // 카테고리 선택 핸들러
   const handleCategorySelect = (shopFromCategories: string) => {
     setCategory(shopFromCategories);
   };
 
+  // 주소 선택 핸들러
   const handleAddressCategorySelect = (address1: string) => {
     setAddress1(address1);
   };
@@ -80,7 +90,6 @@ export default function ShopCommonForm({
     if (selectedFile) {
       setFile(selectedFile);
 
-      // 파일 URL을 생성하여 미리보기
       const fileUrl = URL.createObjectURL(selectedFile);
       setPreviewUrl(fileUrl);
     }
@@ -88,58 +97,45 @@ export default function ShopCommonForm({
 
   // 이미지 삭제 처리
   const handleRemoveImage = () => {
-    setFile(null); // 파일 상태 초기화
-    setPreviewUrl(null); // 미리보기 상태 초기화
+    clearImage();
   };
 
+  // 시급 입력 처리
   const handleWageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const input = e.target.value.replace(/,/g, ''); // 숫자만 남기기
+    const input = e.target.value.replace(/,/g, '');
     if (input === '' || /^\d*$/.test(input)) {
-      const numericValue = input ? parseInt(input, 10) : 0; // 입력값을 숫자로 변환
-      setOriginalHourlyPay(numericValue); // 숫자로 상태 설정
+      const numericValue = input ? parseInt(input, 10) : 0;
+      setOriginalHourlyPay(numericValue);
     }
   };
 
+  // 폼 제출 처리
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
     if (!isFormValid) {
       alert('모든 필드를 올바르게 입력해 주세요!');
       return;
     }
 
-    if (!file) {
-      alert('이미지를 선택해주세요!');
-      return;
-    }
-
     try {
-      // 1. Presigned URL 받기
-      const presignedUrl: string = await presignedImg(file.name);
-      console.log(presignedUrl);
+      let imageUrl = initialData?.imageUrl;
 
-      // 2. 이미지 파일을 S3에 업로드
-      const uploadedUrl = await uploadToS3(presignedUrl, file);
-      console.log(uploadedUrl);
+      if (file) {
+        const presignedUrl: string = await presignedImg(file.name);
+        const uploadedUrl = await uploadToS3(presignedUrl, file);
+        imageUrl = uploadedUrl.split('?')[0];
+      }
 
-      const imageUrl = uploadedUrl.split('?')[0]; // Presigned URL에서 쿼리 제거
-      console.log('Final Image URL:', imageUrl);
-
-      // 3. 업로드된 이미지 URL을 포함하여 폼 데이터 준비
       const formData = {
         name,
         category,
         address1,
         address2,
         originalHourlyPay,
-        imageUrl, // 업로드된 이미지 URL
+        imageUrl,
         description,
       };
 
-      // Alert로 제출된 데이터 확인
-      alert(`Form Data: ${JSON.stringify(formData, null, 2)}`);
-
-      // 폼 데이터 서버로 전송 (onSubmit 사용)
       onSubmit(formData);
     } catch (error) {
       console.error('폼 제출 중 오류 발생:', error);
@@ -148,11 +144,11 @@ export default function ShopCommonForm({
   };
 
   return (
-    <section className="md:pb-15 w-full bg-gray-5 px-3 pb-20 pt-36 md:px-8 md:pt-32 xl:px-60">
+    <section className="w-full bg-gray-5 px-3 pb-20 pt-10 md:px-8 md:pb-[3.75rem] md:pt-[3.75rem] xl:px-60">
       <div className="mb-6 flex w-full items-center justify-between">
         <h3 className="flex-1 text-lg font-bold md:text-custom-xl">가게 정보</h3>
         <div className="h-auto w-full max-w-3.5 md:max-w-4">
-          <Link href="/shop">
+          <Link href={mode === 'create' ? '/owner/my-shop/' : '/owner/my-shop'}>
             <Image
               className="object-contain"
               src="/shop-icons/close-icon.png"
@@ -259,18 +255,30 @@ export default function ShopCommonForm({
             {/* 커스텀 버튼 (이미지 추가하기) */}
             <label
               htmlFor="Image"
-              className="absolute inset-0 flex cursor-pointer flex-col items-center justify-center gap-3"
+              className={`${mode === 'edit' ? 'z-10 bg-gray-black opacity-[70%]' : 'z-0'} absolute inset-0 flex cursor-pointer flex-col items-center justify-center gap-3`}
             >
               <div className="h-auto w-full max-w-8">
-                <Image
-                  className="object-contain"
-                  src="/shop-icons/camera.png"
-                  alt="카메라 아이콘"
-                  width={33}
-                  height={27}
-                />
+                {mode === 'create' ? (
+                  <Image
+                    className="object-contain"
+                    src="/shop-icons/camera.png"
+                    alt="카메라 아이콘"
+                    width={33}
+                    height={27}
+                  />
+                ) : (
+                  <Image
+                    className="object-contain"
+                    src="/shop-icons/camera-white.png"
+                    alt="카메라 아이콘"
+                    width={33}
+                    height={27}
+                  />
+                )}
               </div>
-              <span>{mode === 'create' ? '이미지 추가하기' : '이미지 변경하기'}</span>
+              <span className={`${mode === 'create' ? '' : 'text-gray-white'}`}>
+                {mode === 'create' ? '이미지 추가하기' : '이미지 변경하기'}
+              </span>
             </label>
 
             {/* 선택된 이미지 미리보기 */}

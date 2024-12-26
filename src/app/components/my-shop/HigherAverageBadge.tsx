@@ -1,12 +1,12 @@
 import Image from 'next/image';
 import { hourPayComparisom } from '@/app/utils/hourPayComparison';
 
+const originalHourlyPay = 10000;
+
 export default function HigherAverageBadge({
-  originalHourlyPay,
   hourlyPay,
   closed = false,
 }: {
-  originalHourlyPay: number;
   hourlyPay: number;
   closed?: boolean;
 }) {

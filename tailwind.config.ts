@@ -75,6 +75,25 @@ export default {
         '.custom-scrollbar::-webkit-scrollbar-button': {
           display: 'none',
         },
+        '@keyframes shine': {
+          '0%': { transform: 'skew(45deg) translateX(0%)' },
+          '100%': { transform: 'skew(45deg) translateX(200%)' },
+        },
+        '.shinny': {
+          position: 'relative',
+          overflow: 'hidden',
+        },
+        '.shinny::before': {
+          content: '""',
+          position: 'absolute',
+          top: '0',
+          left: '0',
+          width: '100%',
+          height: '100%',
+          background: 'rgba(255, 255, 255, 0.2)',
+          transform: 'skew(5deg)',
+          animation: 'shine 1.5s ease-in-out infinite',
+        },
       });
     }),
   ],

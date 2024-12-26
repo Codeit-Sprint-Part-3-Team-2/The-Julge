@@ -23,18 +23,14 @@ export default function MyNotice({ notice }: { notice: NoticeDetail }) {
             className="object-cover"
           />
         </div>
-        <div className="flex w-[38%] flex-col gap-8 pt-4 md:h-[100%] md:justify-between">
+        <div className="flex w-full flex-col gap-8 pt-4 md:h-[100%] md:w-[38%] md:justify-between">
           <div className="flex flex-col gap-1 sm:gap-2">
-            <span className="label">{notice.shop.item.category}</span>
+            <span className="category">시급</span>
             <div className="flex items-center gap-3">
               <h4 className="text-2xl font-semibold text-black sm:text-[1.75rem]">
-                {`${notice.hourlyPay.toLocaleString()}원`}
+                {`${Number(notice.hourlyPay).toLocaleString()}원`}
               </h4>
-              <HigherAverageBadge
-                originalHourlyPay={notice.shop.item.originalHourlyPay}
-                hourlyPay={notice.hourlyPay}
-                closed={notice.closed}
-              />
+              <HigherAverageBadge hourlyPay={notice.hourlyPay} closed={notice.closed} />
             </div>
             <div className="my-2 flex flex-col gap-2">
               <Information
@@ -53,17 +49,21 @@ export default function MyNotice({ notice }: { notice: NoticeDetail }) {
               />
             </div>
             <p className="max-h-[23.75rem] w-[100%] text-sm text-black sm:text-base">
-              {notice.shop.item.description}
+              {notice.shop.item.description
+                ? notice.shop.item.description
+                : '등록된 설명이 없습니다.'}
             </p>
           </div>
           <Button className="h-12 w-full" variant="reverse">
-            <Link href="/owner/my-shop/register/edit">공고 편집하기</Link>
+            <Link href={`/owner/my-shop/notice/${notice.id}/edit`}>공고 편집하기</Link>
           </Button>
         </div>
       </div>
       <div className="mt-6 w-full rounded-lg bg-gray-10 p-8">
         <h5 className="mb-3 font-semibold text-black">공고 설명</h5>
-        <p className="text-black">{notice.description}</p>
+        <p className="text-black">
+          {notice.description ? notice.description : '등록된 설명이 없습니다.'}
+        </p>
       </div>
     </>
   );
