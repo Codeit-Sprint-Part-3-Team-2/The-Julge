@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 import { useState, useRef, useEffect } from 'react';
 import Image from 'next/image';
@@ -13,7 +13,7 @@ import { LOCATION_LIST } from '@/app/constants/location';
 
 // 프로필 수정하기
 const ProfileEditPage = () => {
-  const { getMe, userId, type } = useAuthStore();
+  const { token, getMe, userId, type } = useAuthStore();
   const router = useRouter();
 
   const [name, setName] = useState('');
@@ -23,18 +23,21 @@ const ProfileEditPage = () => {
   const [nameError, setNameError] = useState('');
   const [phoneError, setPhoneError] = useState('');
   const [addressError, setAddressError] = useState('');
-  const [loading, setLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(false); // 로딩 상태
   const [submitAttempted, setSubmitAttempted] = useState(false); // 제출 시 오류 체크
 
   const nameInputRef = useRef<HTMLInputElement | null>(null);
   const phoneInputRef = useRef<HTMLInputElement | null>(null);
 
   useEffect(() => {
-    if (!userId) {
+    if (!token) {
+      alert('로그인이 필요합니다.');
       router.push('/login');
+      return;
     } else if (type !== 'employee') {
       alert('접근 권한이 없습니다.');
       router.push('/');
+      return;
     }
 
     const fetchUserProfile = async () => {
@@ -44,7 +47,6 @@ const ProfileEditPage = () => {
         setPhone(res.item.phone || '');
         setAddress(res.item.address || '');
         setBio(res.item.bio || '');
-        setLoading(false);
       } catch (error) {
         console.error('프로필 불러오기 실패:', error);
         router.push('/worker/profile');
@@ -52,11 +54,7 @@ const ProfileEditPage = () => {
     };
 
     fetchUserProfile();
-  }, [router, getMe, userId, type]);
-
-  if (loading) {
-    return <div>로딩 중...</div>;
-  }
+  }, [router, getMe, token, type]);
 
   // 제출 형식
   const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -94,9 +92,9 @@ const ProfileEditPage = () => {
     setBio(e.target.value);
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setSubmitAttempted(true); 
+    setSubmitAttempted(true);
 
     const nameRegex = /^[a-zA-Z가-힣]+$/;
     if (!name) {
@@ -125,13 +123,21 @@ const ProfileEditPage = () => {
       return;
     }
 
-    if (userId) {
-      updateUserProfile(userId, { name, phone, address, bio });
-      alert('수정이 완료되었습니다.');
-    }
+    if (!token || !userId) return;
 
-    // 내 프로필 페이지
-    router.push('/worker/profile');
+    setIsLoading(true); // 로딩 상태 시작
+
+    try {
+      // API 호출
+      await updateUserProfile(token, userId, { name, phone, address, bio });
+      alert('수정이 완료되었습니다.');
+      router.push('/worker/profile');
+    } catch (error) {
+      console.error('프로필 수정 실패:', error);
+      alert('수정에 실패했습니다. 다시 시도해 주세요.');
+    } finally {
+      setIsLoading(false); // 로딩 상태 종료
+    }
   };
 
   const handleClose = () => {
@@ -206,7 +212,7 @@ const ProfileEditPage = () => {
 
         {/* 수정하기 버튼 */}
         <div className="text-center">
-          <Button className="mt-6 w-full p-[0.875rem] sm:mt-8 sm:max-w-80" type="submit">
+          <Button className="mt-6 w-full p-[0.875rem] sm:mt-8 sm:max-w-80" type="submit" disabled={isLoading}>
             수정하기
           </Button>
         </div>

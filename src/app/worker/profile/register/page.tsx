@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 import { useState, useRef, useEffect } from 'react';
 import Image from 'next/image';
@@ -13,7 +13,7 @@ import { LOCATION_LIST } from '@/app/constants/location';
 
 // 프로필 등록하기
 const ProfileRegisterPage = () => {
-  const { userId, type } = useAuthStore();
+  const { token, userId, type } = useAuthStore();
   const router = useRouter();
 
   const [name, setName] = useState('');
@@ -24,6 +24,7 @@ const ProfileRegisterPage = () => {
   const [phoneError, setPhoneError] = useState('');
   const [addressError, setAddressError] = useState('');
   const [submitAttempted, setSubmitAttempted] = useState(false); // 제출 시 오류 체크
+  const [isLoading, setIsLoading] = useState(false); // 로딩 상태 관리
 
   const nameInputRef = useRef<HTMLInputElement | null>(null);
   const phoneInputRef = useRef<HTMLInputElement | null>(null);
@@ -73,7 +74,7 @@ const ProfileRegisterPage = () => {
     setBio(e.target.value);
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSubmitAttempted(true);
 
@@ -104,13 +105,28 @@ const ProfileRegisterPage = () => {
       return;
     }
 
-    if (userId) {
-      updateUserProfile(userId, { name, phone, address, bio });
-      alert('등록이 완료되었습니다.');
-    }
+    if (!token || !userId) return;
 
-    // 내 프로필 페이지
-    router.push('/worker/profile');
+    setIsLoading(true); // 로딩 상태 시작
+
+    try {
+      // 비동기 API 호출
+      const response = await updateUserProfile(userId, token, { name, phone, address, bio });
+
+      if (response?.success) {
+        alert('등록이 완료되었습니다.');
+        router.push('/worker/profile');
+      } else {
+        // 성공하지 않으면 기본적인 피드백만 표시
+        alert('프로필 등록에 실패했습니다. 다시 시도해주세요.');
+      }
+    } catch (error) {
+      console.error(error);
+      // API 오류 발생 시 단순히 알림을 띄우고 종료
+      alert('프로필 등록 중 오류가 발생했습니다. 다시 시도해주세요.');
+    } finally {
+      setIsLoading(false); // 로딩 상태 종료
+    }
   };
 
   const handleClose = () => {
@@ -185,7 +201,7 @@ const ProfileRegisterPage = () => {
 
         {/* 등록하기 버튼 */}
         <div className="text-center">
-          <Button className="mt-6 w-full p-[0.875rem] sm:mt-8 sm:max-w-80" type="submit">
+          <Button className="mt-6 w-full p-[0.875rem] sm:mt-8 sm:max-w-80" type="submit" disabled={isLoading}>
             등록하기
           </Button>
         </div>

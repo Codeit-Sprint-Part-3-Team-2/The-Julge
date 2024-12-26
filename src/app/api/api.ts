@@ -155,17 +155,24 @@ const putShopNotice = async (
 };
 
 // 유저 프로필 업데이트
-const updateUserProfile = async (userId: string, requestBody: UserProfile) => {
-  const response = await instance.put(`/users/${userId}`, requestBody);
+const updateUserProfile = async (token: string, userId: string, requestBody: UserProfile) => {
+  const response = await instance.put(`/users/${userId}`, requestBody, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
   return response.data;
 };
 
 // 유저 지원 목록 조회
-const getUserApplications = async (userId: string, offset: number = 0, limit: number = 5) => {
+const getUserApplications = async (token: string, userId: string, offset: number = 0, limit: number = 5) => {
   const response = await instance.get(`/users/${userId}/applications`, {
     params: {
       offset,
       limit,
+    },
+    headers: {
+      Authorization: `Bearer ${token}`,
     },
   });
   return response.data;
@@ -184,4 +191,3 @@ export {
   updateUserProfile,
   getUserApplications,
 };
-
