@@ -1,18 +1,19 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import LayoutWrapper from '@/app/components/worker/LayoutWrapper';
 import EmptyContent from '@/app/components/worker/EmptyContent';
 import ProfileInfo from '@/app/components/worker/ProfileInfo';
 import ApplicationHistory from '@/app/components/worker/ApplicationHistory';
 import useAuthStore from '@/app/stores/authStore';
+import { User } from '@/app/types/Auth';
 
+//내 프로필 페이지
 const ProfilePage = () => {
-  const { initialize, isInitialized, getMe, type, token, userId, profileRegistered, user } =
-    useAuthStore();
+  const [userProfile, setUserProfile] = useState<User | null>(null);
+  const { initialize, isInitialized, getMe, type, token, userId, user } = useAuthStore();
   const router = useRouter();
-
   useEffect(() => {
     initialize();
   }, [initialize]);
@@ -21,13 +22,15 @@ const ProfilePage = () => {
     if (!isInitialized) return;
 
     const fetchData = async () => {
-      if (!token || !userId) {
+      if ((!token || !userId) && localStorage !== undefined) {
         router.push('/login');
         return;
       }
 
       try {
-        await getMe();
+        const res = await getMe();
+        setUserProfile(res.item);
+        //console.log(res.item, 'res');
       } catch (error) {
         console.error('프로필 로드 실패:', error);
         router.push('/login');
@@ -43,20 +46,19 @@ const ProfilePage = () => {
     }
   }, [type, router]);
 
-  if (!isInitialized || profileRegistered === null || user === null) {
+  if (!isInitialized || !userProfile) {
     return <div>로딩 중...</div>;
   }
 
   if (type !== 'employee') {
     return <div>접근 권한이 없습니다.</div>;
   }
-
   return (
     <div className="text-gray-black">
-      {profileRegistered ? (
+      {!!userProfile.name ? (
         <>
           <LayoutWrapper>
-            <ProfileInfo user={user} />
+            <ProfileInfo user={user} onButtonClick={() => router.push('/worker/profile/edit')} />
           </LayoutWrapper>
           <ApplicationHistory />
         </>

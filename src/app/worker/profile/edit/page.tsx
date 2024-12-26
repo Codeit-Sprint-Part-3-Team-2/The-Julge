@@ -11,9 +11,9 @@ import { useRouter } from 'next/navigation';
 import { updateUserProfile } from '@/app/api/api';
 import { LOCATION_LIST } from '@/app/constants/location';
 
-// 프로필 등록하기
-const ProfileRegisterPage = () => {
-  const { userId, type } = useAuthStore();
+// 프로필 수정하기
+const ProfileEditPage = () => {
+  const { getMe, userId, type } = useAuthStore();
   const router = useRouter();
 
   const [name, setName] = useState('');
@@ -23,6 +23,7 @@ const ProfileRegisterPage = () => {
   const [nameError, setNameError] = useState('');
   const [phoneError, setPhoneError] = useState('');
   const [addressError, setAddressError] = useState('');
+  const [loading, setLoading] = useState(true);
   const [submitAttempted, setSubmitAttempted] = useState(false); // 제출 시 오류 체크
 
   const nameInputRef = useRef<HTMLInputElement | null>(null);
@@ -35,7 +36,27 @@ const ProfileRegisterPage = () => {
       alert('접근 권한이 없습니다.');
       router.push('/');
     }
-  }, [router, userId, type]);
+
+    const fetchUserProfile = async () => {
+      try {
+        const res = await getMe();
+        setName(res.item.name || '');
+        setPhone(res.item.phone || '');
+        setAddress(res.item.address || '');
+        setBio(res.item.bio || '');
+        setLoading(false);
+      } catch (error) {
+        console.error('프로필 불러오기 실패:', error);
+        router.push('/worker/profile');
+      }
+    };
+
+    fetchUserProfile();
+  }, [router, getMe, userId, type]);
+
+  if (loading) {
+    return <div>로딩 중...</div>;
+  }
 
   // 제출 형식
   const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -75,7 +96,7 @@ const ProfileRegisterPage = () => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    setSubmitAttempted(true);
+    setSubmitAttempted(true); 
 
     const nameRegex = /^[a-zA-Z가-힣]+$/;
     if (!name) {
@@ -106,7 +127,7 @@ const ProfileRegisterPage = () => {
 
     if (userId) {
       updateUserProfile(userId, { name, phone, address, bio });
-      alert('등록이 완료되었습니다.');
+      alert('수정이 완료되었습니다.');
     }
 
     // 내 프로필 페이지
@@ -120,7 +141,7 @@ const ProfileRegisterPage = () => {
   return (
     <LayoutWrapper className="bg-gray-5 pb-[5rem] text-gray-black">
       <div className="mb-6 flex justify-between sm:mb-8">
-        <h2 className="text-xl font-bold sm:text-[1.75rem]">내 프로필</h2>
+        <h2 className="text-xl font-bold sm:text-[1.75rem]">내 프로필 수정</h2>
         <button onClick={handleClose} className="relative size-6 sm:size-8">
           <Image src="/header/ic-close.svg" alt="닫기" fill className="object-contain" />
         </button>
@@ -183,10 +204,10 @@ const ProfileRegisterPage = () => {
           />
         </div>
 
-        {/* 등록하기 버튼 */}
+        {/* 수정하기 버튼 */}
         <div className="text-center">
           <Button className="mt-6 w-full p-[0.875rem] sm:mt-8 sm:max-w-80" type="submit">
-            등록하기
+            수정하기
           </Button>
         </div>
       </form>
@@ -194,4 +215,4 @@ const ProfileRegisterPage = () => {
   );
 };
 
-export default ProfileRegisterPage;
+export default ProfileEditPage;

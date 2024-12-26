@@ -2,6 +2,7 @@ import { create } from 'zustand';
 import { instance } from '@/app/api/api';
 import { Auth, AuthResponse, User } from '@/app/types/Auth';
 import { persist } from 'zustand/middleware';
+import { ProfileResponse } from '../types/Profile';
 
 interface AuthStore {
   user: User | null;
@@ -9,7 +10,7 @@ interface AuthStore {
   type: 'employee' | 'employer' | null;
   token: string | null;
   isInitialized: boolean;
-  getMe: () => void;
+  getMe: () => Promise<ProfileResponse>;
   signup: (data: Auth) => Promise<AuthResponse>;
   login: (data: Auth) => Promise<AuthResponse>;
   logout: () => void;
@@ -23,7 +24,6 @@ const useAuthStore = create<AuthStore>()(
       userId: null,
       type: null,
       token: null,
-      profileRegistered: false,
       isInitialized: false,
 
       initialize: () => {
@@ -34,10 +34,6 @@ const useAuthStore = create<AuthStore>()(
           userId: storedUserId || null,
           isInitialized: true,
         });
-      },
-
-      setProfileRegistered: (status: boolean) => {
-        set({ profileRegistered: status });
       },
 
       getMe: async () => {
@@ -59,13 +55,12 @@ const useAuthStore = create<AuthStore>()(
           set({
             user: response.data.item,
             type: response.data.item.type,
-            profileRegistered: response.data.item.profileRegistered,
           });
 
           return response.data;
         } catch (error) {
           console.error('getMe 실패:', error);
-          set({ user: null, type: null, profileRegistered: false });
+          set({ user: null, type: null });
           throw new Error('내 정보 가져오기에 실패했습니다.');
         }
       },
@@ -110,7 +105,6 @@ const useAuthStore = create<AuthStore>()(
           userId: null,
           type: null,
           token: null,
-          profileRegistered: false,
         });
       },
     }),
