@@ -1,54 +1,5 @@
 import axios from 'axios';
-
-interface ShopItem {
-  id: string;
-  name: string;
-  address1: string;
-  imageUrl: string;
-  originalHourlyPay: number;
-  category: string;
-  description: string;
-}
-
-interface NoticeItem {
-  id: string;
-  hourlyPay: number;
-  startsAt: string;
-  workhour: number;
-  description: string;
-  closed: boolean;
-  shop: {
-    item: ShopItem;
-  };
-  shopId: string;
-}
-
-interface ApiResponse {
-  items: { item: NoticeItem }[];
-  count: number;
-  hasNext: boolean;
-}
-
-interface Application {
-  id: string;
-  status: 'pending' | 'accepted' | 'rejected' | 'canceled';
-}
-
-interface ApplicationResponse {
-  items: { item: Application }[];
-}
-
-interface NoticeDetail {
-  id: string;
-  hourlyPay: number;
-  startsAt: string;
-  workhour: number;
-  description: string;
-  closed: boolean;
-  shop: {
-    item: ShopItem;
-  };
-}
+import { NoticeItem, ApiResponse, NoticeDetail, ApplicationResponse } from '../types/Notice';
 
 const apiToken = process.env.NEXT_PUBLIC_API_TOKEN;
 // 후에 제거할 토큰!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -85,14 +36,13 @@ export const fetchNotices = async (
       url += `&keyword=${encodeURIComponent(keyword)}`;
     }
 
-    const response = await axios.get<ApiResponse>(url);
-
-    const formattedData = response.data.items.map((data) => ({
+    const response = await axios.get<ApiResponse<NoticeItem>>(url);
+    const formattedData = response.data.items.map((data: { item: NoticeItem }) => ({
       ...data.item,
       shopId: data.item.shop.item.id,
     }));
 
-    return { items: formattedData, count: response.data.count };
+    return { items: formattedData, count: response.data.count || 0 };
   } catch (error) {
     console.error('Error fetching notices:', error);
     throw new Error('Failed to fetch notices');

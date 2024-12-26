@@ -7,36 +7,7 @@ import { fetchNotices } from '@/app/api/noticeApi';
 import { useRecentNoticesStore } from '@/app/stores/useRecentNoticesStore';
 import isPastNotice from '@/app/utils/isPastNotice';
 import LoadingSpinner from '../common/LoadingSpinner';
-
-interface ShopItem {
-  id: string;
-  name: string;
-  address1: string;
-  imageUrl: string;
-  originalHourlyPay: number;
-}
-
-interface NoticeItem {
-  id: string;
-  hourlyPay: number;
-  startsAt: string;
-  workhour: number;
-  description: string;
-  closed: boolean;
-  shop: {
-    item: ShopItem;
-  };
-  shopId: string;
-}
-
-interface AllNoticesProps {
-  currentPage: number;
-  itemsPerPage: number;
-  setTotalItems: (total: number) => void;
-  sortOption: string;
-  filterOptions: { locations: string[]; startDate: string; amount: string };
-  query?: string;
-}
+import { AllNoticesProps, NoticeItem } from '@/app/types/Notice';
 
 export default function AllNotices({
   currentPage,

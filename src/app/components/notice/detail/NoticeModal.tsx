@@ -35,7 +35,7 @@ const NoticeModal: React.FC<NoticeModalProps> = ({
           </div>
         </div>
         <div className="text-center text-base text-gray-black">{content}</div>
-        <div className="mt-7 flex justify-center space-x-4">
+        <div className="mt-7 flex justify-center gap-2">
           {variant === 'confirm' && (
             <Button variant="reverse" onClick={onCancel} className="w-20">
               {cancelText}
