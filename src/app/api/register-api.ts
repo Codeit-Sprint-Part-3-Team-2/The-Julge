@@ -83,9 +83,6 @@ export const getShopDetails = async (shopId: string) => {
 // Presigned URL을 얻기 위한 API
 export const presignedImg = async (fileName: string): Promise<string> => {
   try {
-    if (!token) {
-      throw new Error('로그인 후 다시 시도해 주세요.');
-    }
     const response = await API.post('/images', { name: fileName });
     return response.data.item.url;
   } catch (error) {
