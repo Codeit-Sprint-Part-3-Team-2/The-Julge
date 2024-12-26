@@ -25,20 +25,16 @@ export default function MyShopPage() {
   }, [shopId]);
 
   const fetchNotice = useCallback(async () => {
-    if (!shopId) return;
-
     const response = await getShopNotices(shopId as string);
     setNotice(response.items);
   }, [shopId]);
 
   useEffect(() => {
-    if (!shopId) return;
-
     fetchShop();
     fetchNotice();
-  }, [fetchShop, fetchNotice, shopId]);
+  }, [fetchShop, fetchNotice]);
 
-  if (!user) {
+  if (!user || !shopId) {
     return <div className="my-10 text-center">로그인이 필요합니다.</div>;
   }
 
