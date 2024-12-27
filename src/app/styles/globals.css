@@ -18,7 +18,7 @@ body {
   .container {
     max-width: 964px;
     width: 90%;
-    margin: 0 auto;
+    margin: 4rem auto 0;
   }
 
   .h3 {
@@ -27,18 +27,70 @@ body {
     font-weight: 700;
   }
 
-  .label {
+  .input {
+    margin-top: 0.5rem;
+    margin-bottom: 0.5rem;
+    width: 100%;
+    border-radius: 0.4rem;
+    border: 1px solid #c8c9cf;
+    padding: 1rem 1.25rem;
+    color: #111322;
+    outline: none;
+    height: 3.6rem;
+  }
+
+  .textarea {
+    height: 10rem;
+  }
+
+  .errorMessage {
+    color: red;
+    font-size: 0.875rem;
+  }
+
+  .buttonVer1 {
+    height: 2.75rem;
+    border-radius: 0.4rem;
+    background-color: #ea3c12;
+    color: #ffffff;
+  }
+
+  .category {
     font-weight: 700;
     color: #ea3c12;
   }
 
+  .th {
+    font-weight: 400;
+    font-size: 0.875rem;
+    padding-top: 0.875rem;
+    padding-bottom: 0.875rem;
+    color: #111322;
+    padding-left: 0.75rem;
+  }
+
+  .td {
+    padding-top: 1.25rem;
+    padding-bottom: 1.25rem;
+    color: #111322;
+    padding-left: 0.75rem;
+  }
+
   @media (max-width: 640px) {
+    .container {
+      margin-top: 2.5rem;
+    }
+
     .h3 {
       font-size: 1.25rem;
     }
 
-    .label {
+    .category {
       font-size: 0.875rem;
+    }
+
+    .buttonVer1 {
+      height: 2.5rem;
     }
   }
 }

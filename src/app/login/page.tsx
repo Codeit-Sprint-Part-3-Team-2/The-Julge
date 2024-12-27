@@ -34,12 +34,10 @@ function LoginPage() {
     const { email, password } = data;
 
     try {
-      // 서버로 로그인 요청
       const response = await axios.post(BASE_URL, { email: email, password: password });
 
       if (response.status === 200) {
-        // 로그인 성공: accessToken 저장 및 페이지 이동
-        const { accessToken } = response.data;
+        const accessToken = response?.data?.item?.token;
         localStorage.setItem('accessToken', accessToken);
         router.push('/');
       }

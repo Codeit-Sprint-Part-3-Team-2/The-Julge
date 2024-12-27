@@ -1,15 +1,26 @@
 import axios, { AxiosError } from 'axios';
 
-const token = process.env.NEXT_PUBLIC_API_TOKEN;
-
 // axios 인스턴스 생성
 const API = axios.create({
   baseURL: 'https://bootcamp-api.codeit.kr/api/11-2/the-julge',
   headers: {
     'Content-Type': 'application/json',
-    Authorization: `Bearer ${token}`,
   },
 });
+
+// 요청 인터셉터 설정
+API.interceptors.request.use(
+  (config) => {
+    const token = localStorage.getItem('accessToken'); // 로컬스토리지에서 토큰 가져오기
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+    return config;
+  },
+  (error) => {
+    return Promise.reject(error);
+  }
+);
 
 // 가게 등록 API
 export const registerShop = async (shopData: {
@@ -72,9 +83,6 @@ export const getShopDetails = async (shopId: string) => {
 // Presigned URL을 얻기 위한 API
 export const presignedImg = async (fileName: string): Promise<string> => {
   try {
-    if (!token) {
-      throw new Error('로그인 후 다시 시도해 주세요.');
-    }
     const response = await API.post('/images', { name: fileName });
     return response.data.item.url;
   } catch (error) {

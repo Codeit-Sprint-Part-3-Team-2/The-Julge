@@ -4,17 +4,20 @@ import formatTimeRange from '@/app/utils/formatTimeRange';
 import HigherAverageBadge from '@/app/components/my-shop/HigherAverageBadge';
 import Information from './Information';
 import Link from 'next/link';
-import calculateAverageHourlyPay from '@/app/utils/calculateAverageHourlyPay';
+import Image from 'next/image';
+
+interface NoticeItem {
+  item: Notice;
+  links: [];
+}
 
 export default function NoticeCard({
   not,
   shop,
-  notice,
   closed,
 }: {
-  not: Notice;
+  not: NoticeItem;
   shop: Shop;
-  notice: Notice[];
   closed: boolean;
 }) {
   const color = {
@@ -23,8 +26,6 @@ export default function NoticeCard({
       gray: closed ? 'text-gray-30' : 'text-gray-50',
     },
   };
-
-  const averageHourlyPay = calculateAverageHourlyPay(notice);
 
   return (
     <Link href={`/owner/my-shop/notice/${not.item.id}`}>
@@ -36,8 +37,8 @@ export default function NoticeCard({
             </div>
           </div>
         )}
-        <div className="flex h-[10rem] items-center justify-center rounded-xl bg-gray-20">
-          <span>리스폰스에 이미지 없음</span>
+        <div className="relative flex h-[10rem] items-center justify-center overflow-hidden rounded-xl bg-gray-20">
+          <Image fill src={shop.imageUrl} alt="매장 이미지" sizes="(max-width: 640px) 100%" />
         </div>
         <div className="mt-5 flex h-[42%] flex-col justify-between">
           <div className="flex flex-col gap-2">
@@ -61,13 +62,9 @@ export default function NoticeCard({
           </div>
           <div className="flex flex-col justify-between pt-[0.6rem] sm:flex-row sm:items-center">
             <span className={`text-lg font-semibold ${color.text.black} sm:text-2xl`}>
-              {`${not.item.hourlyPay.toLocaleString()}원`}
+              {`${Number(not.item.hourlyPay).toLocaleString()}원`}
             </span>
-            <HigherAverageBadge
-              originalHourlyPay={averageHourlyPay}
-              hourlyPay={not.item.hourlyPay}
-              closed={closed}
-            />
+            <HigherAverageBadge hourlyPay={not.item.hourlyPay} closed={closed} />
           </div>
         </div>
       </div>

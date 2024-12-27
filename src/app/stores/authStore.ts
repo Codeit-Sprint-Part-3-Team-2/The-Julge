@@ -1,7 +1,20 @@
 import { create } from 'zustand';
 import { instance } from '@/app/api/api';
-import { Auth, AuthResponse, AuthStore } from '@/app/types/Auth';
+import { Auth, AuthResponse, User } from '@/app/types/Auth';
 import { persist } from 'zustand/middleware';
+
+interface AuthStore {
+  user: User | null;
+  userId: string | null;
+  type: 'employee' | 'employer' | null;
+  token: string | null;
+  isInitialized: boolean;
+  getMe: () => void;
+  signup: (data: Auth) => Promise<AuthResponse>;
+  login: (data: Auth) => Promise<AuthResponse>;
+  logout: () => void;
+  initialize: () => void;
+}
 
 const useAuthStore = create<AuthStore>()(
   persist(
