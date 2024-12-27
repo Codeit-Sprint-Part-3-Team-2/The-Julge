@@ -45,15 +45,15 @@ const Header = ({ hiddenPaths }: HeaderProps) => {
   };
 
   return (
-    <header className="sticky inset-x-0 top-0 z-10 bg-white px-5 py-2.5 text-sm text-gray-black sm:px-8 sm:py-4 sm:text-base lg:px-0">
+    <header className="sticky inset-x-0 top-0 z-20 bg-white px-5 py-2.5 text-sm text-gray-black sm:px-8 sm:py-4 sm:text-base lg:px-0">
       <div className="mx-auto flex items-center justify-between lg:max-w-5xl">
         <div className="mr-6 flex max-w-[602px] gap-8 sm:w-full md:gap-10">
           <h1 className="h-7 w-20 shrink-0 sm:h-10 sm:w-28">
-            <Link href="/" className="relative size-full block">
-            <Image src="/header/logo.svg" alt="The-Julge" fill className="object-contain" />
-          </Link>
+            <Link href="/" className="relative block size-full">
+              <Image src="/header/logo.svg" alt="The-Julge" fill className="object-contain" />
+            </Link>
           </h1>
-          
+
           {/* 데스크탑 검색창 */}
           <div className="hidden w-full sm:block">
             <Search />
