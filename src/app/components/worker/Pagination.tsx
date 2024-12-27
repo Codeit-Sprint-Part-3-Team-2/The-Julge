@@ -15,12 +15,7 @@ const Pagination = ({ currentPage, totalPages, paginate }: PaginationProps) => {
         disabled={currentPage === 1}
         className="relative size-5 disabled:opacity-[0.37]"
       >
-        <Image
-          src="/worker/ic-arrow-active.svg"
-          alt="이전"
-          fill
-          className="object-contain"
-        />
+        <Image src="/worker/ic-arrow-active.svg" alt="이전" fill className="object-contain" />
       </button>
 
       <div className="flex gap-[2px]">

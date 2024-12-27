@@ -1,4 +1,4 @@
-"use client";
+'use client';
 
 import { useState, useRef, useEffect } from 'react';
 import Image from 'next/image';
@@ -23,14 +23,14 @@ const ProfileEditPage = () => {
   const [nameError, setNameError] = useState('');
   const [phoneError, setPhoneError] = useState('');
   const [addressError, setAddressError] = useState('');
-  const [isLoading, setIsLoading] = useState(false); // 로딩 상태
+  const [isLoading, setIsLoading] = useState(false);
   const [submitAttempted, setSubmitAttempted] = useState(false); // 제출 시 오류 체크
 
   const nameInputRef = useRef<HTMLInputElement | null>(null);
   const phoneInputRef = useRef<HTMLInputElement | null>(null);
 
   useEffect(() => {
-    if (!token) {
+    if (!userId) {
       alert('로그인이 필요합니다.');
       router.push('/login');
       return;
@@ -54,7 +54,7 @@ const ProfileEditPage = () => {
     };
 
     fetchUserProfile();
-  }, [router, getMe, token, type]);
+  }, [router, getMe, userId, type]);
 
   // 제출 형식
   const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -125,10 +125,9 @@ const ProfileEditPage = () => {
 
     if (!token || !userId) return;
 
-    setIsLoading(true); // 로딩 상태 시작
+    setIsLoading(true); 
 
     try {
-      // API 호출
       await updateUserProfile(token, userId, { name, phone, address, bio });
       alert('수정이 완료되었습니다.');
       router.push('/worker/profile');
@@ -136,7 +135,7 @@ const ProfileEditPage = () => {
       console.error('프로필 수정 실패:', error);
       alert('수정에 실패했습니다. 다시 시도해 주세요.');
     } finally {
-      setIsLoading(false); // 로딩 상태 종료
+      setIsLoading(false);
     }
   };
 
@@ -212,7 +211,11 @@ const ProfileEditPage = () => {
 
         {/* 수정하기 버튼 */}
         <div className="text-center">
-          <Button className="mt-6 w-full p-[0.875rem] sm:mt-8 sm:max-w-80" type="submit" disabled={isLoading}>
+          <Button
+            className="mt-6 w-full p-[0.875rem] sm:mt-8 sm:max-w-80"
+            type="submit"
+            disabled={isLoading}
+          >
             수정하기
           </Button>
         </div>

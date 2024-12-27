@@ -2,7 +2,7 @@
 export const formatTimeRange = (startTime: string, workHours: number): string => {
   const start = new Date(startTime);
   if (isNaN(start.getTime())) {
-    throw new Error("Invalid start time format");
+    throw new Error('Invalid start time format');
   }
 
   // 종료 시간 계산
@@ -31,15 +31,32 @@ export const formatTimeRange = (startTime: string, workHours: number): string =>
 };
 
 // 신청내역 상태
-export const getStatusColor = (status: string) => {
+export const getStatus = (status: string) => {
   switch (status) {
-    case '승인완료':
-      return 'text-blue-20 bg-blue-10';
-    case '거절':
-      return 'text-red-40 bg-red-10';
-    case '대기중':
-      return 'text-green-20 bg-green-10';
+    case 'accepted':
+      return {
+        text: '승인완료',
+        color: 'text-blue-20 bg-blue-10',
+      };
+    case 'pending':
+      return {
+        text: '대기중',
+        color: 'text-green-20 bg-green-10',
+      };
+    case 'rejected':
+      return {
+        text: '거절',
+        color: 'text-red-40 bg-red-10',
+      };
+    case 'canceled':
+      return {
+        text: '취소됨',
+        color: 'text-gray-40 bg-gray-10',
+      };
     default:
-      return '';
+      return {
+        text: '기타',
+        color: '',
+      };
   }
 };

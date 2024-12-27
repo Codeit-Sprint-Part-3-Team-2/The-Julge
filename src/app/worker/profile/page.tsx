@@ -12,8 +12,15 @@ import { User } from '@/app/types/Auth';
 //내 프로필 페이지
 const ProfilePage = () => {
   const [userProfile, setUserProfile] = useState<User | null>(null);
-  const { initialize, isInitialized, getMe, type, token, userId, user } = useAuthStore();
   const router = useRouter();
+
+  // const userId = '19467faa-6476-4b06-824f-7c1949df167e';
+  // const token =
+  //   'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiIxOTQ2N2ZhYS02NDc2LTRiMDYtODI0Zi03YzE5NDlkZjE2N2UiLCJpYXQiOjE3MzUyODA2NTB9.kf7YQbCZ0RGcXYWf3pNuasWnNoaDbGjvEc62WSu9VyQ';
+  // const { getMe } = useAuthStore();
+  // const type = 'employee';
+
+  const { initialize, isInitialized, getMe, type, token, userId } = useAuthStore();
   useEffect(() => {
     initialize();
   }, [initialize]);
@@ -30,7 +37,7 @@ const ProfilePage = () => {
       try {
         const res = await getMe();
         setUserProfile(res.item);
-        //console.log(res.item, 'res');
+        console.log(res.item, 'res');
       } catch (error) {
         console.error('프로필 로드 실패:', error);
         router.push('/login');
@@ -52,16 +59,21 @@ const ProfilePage = () => {
     }
   }, [token, router, type]);
 
+  // if (!userProfile) {
+  //   return <div>로딩 중...</div>;
+  // }
   if (!isInitialized || !userProfile) {
     return <div>로딩 중...</div>;
   }
-
   return (
     <div className="text-gray-black">
       {!!userProfile.name ? (
         <>
           <LayoutWrapper>
-            <ProfileInfo user={user} onButtonClick={() => router.push('/worker/profile/edit')} />
+            <ProfileInfo
+              user={userProfile}
+              onButtonClick={() => router.push('/worker/profile/edit')}
+            />
           </LayoutWrapper>
           <ApplicationHistory />
         </>

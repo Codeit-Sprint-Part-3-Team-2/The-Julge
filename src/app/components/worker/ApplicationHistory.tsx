@@ -1,89 +1,82 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import LayoutWrapper from './LayoutWrapper';
 import EmptyContent from './EmptyContent';
 import Pagination from './Pagination';
-import { formatTimeRange, getStatusColor } from './Utils';
-
-// 임시 신청 내역 데이터
-const applicationData = [
-  {
-    storeName: '가게1',
-    startTime: '2024-07-01 15:00',
-    workHours: 2,
-    hourlyRate: 15000,
-    status: '승인완료',
-  },
-  {
-    storeName: '가게2',
-    startTime: '2024-07-02 09:00',
-    workHours: 3,
-    hourlyRate: 12000,
-    status: '대기중',
-  },
-  {
-    storeName: '가게3',
-    startTime: '2024-07-03 14:00',
-    workHours: 4,
-    hourlyRate: 14000,
-    status: '거절',
-  },
-  {
-    storeName: '가게4',
-    startTime: '2024-07-04 08:00',
-    workHours: 2,
-    hourlyRate: 16000,
-    status: '승인완료',
-  },
-  {
-    storeName: '가게5',
-    startTime: '2024-07-05 10:00',
-    workHours: 2,
-    hourlyRate: 15000,
-    status: '대기중',
-  },
-  {
-    storeName: '가게6',
-    startTime: '2024-07-06 11:00',
-    workHours: 3,
-    hourlyRate: 18000,
-    status: '승인완료',
-  },
-];
+import { formatTimeRange, getStatus } from './Utils';
+import useAuthStore from '@/app/stores/authStore';
+import { getUserApplications } from '@/app/api/api';
+import { UserApplication } from '@/app/types/Profile';
 
 // 공통 스타일
 const tbStyle = 'px-3 py-5 border-b border-gray-20';
 const thStyle = 'px-3 py-[0.875rem] font-normal';
 
 const ApplicationHistory = () => {
+  const [applications, setApplications] = useState<UserApplication[]>([]); // 신청 내역 상태
   const [currentPage, setCurrentPage] = useState(1);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const itemsPerPage = 5;
+
+  const { token, userId } = useAuthStore();
+  // const userId = '19467faa-6476-4b06-824f-7c1949df167e';
+  // const token =
+  //   'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiIxOTQ2N2ZhYS02NDc2LTRiMDYtODI0Zi03YzE5NDlkZjE2N2UiLCJpYXQiOjE3MzUyODA2NTB9.kf7YQbCZ0RGcXYWf3pNuasWnNoaDbGjvEc62WSu9VyQ';
   const router = useRouter();
 
-  // 페이지네이션: 현재 페이지에 해당하는 데이터
+  useEffect(() => {
+    if (!token || !userId) {
+      alert('로그인이 필요합니다.');
+      router.push('/login');
+      return;
+    }
+
+    const fetchApplications = async () => {
+      setIsLoading(true);
+      setError(null);
+
+      try {
+        const res = await getUserApplications(token, userId, 0, 100);
+        setApplications(res.items);
+      } catch (err) {
+        setError('신청 내역을 불러오는 데 실패했습니다.');
+        console.error(err);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchApplications();
+  }, [token, userId, router]);
+
+  // 페이지네이션
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-  const currentItems = applicationData.slice(indexOfFirstItem, indexOfLastItem);
+  const currentItems = applications.slice(indexOfFirstItem, indexOfLastItem);
 
   // 페이지 수 계산
-  const totalPages = Math.ceil(applicationData.length / itemsPerPage);
+  const totalPages = Math.ceil(applications.length / itemsPerPage);
 
   // 페이지네이션 변경
-  const paginate = (pageNumber: number) => setCurrentPage(pageNumber);
-
-  // 공고보러가기
-  const handleClick = () => {
-    router.push('/posts');
+  const paginate = (pageNumber: number) => {
+    if (pageNumber >= 1 && pageNumber <= totalPages) {
+      setCurrentPage(pageNumber);
+    }
   };
 
   return (
     <LayoutWrapper className="bg-gray-5 pb-[5rem] sm:pb-[7.5rem]">
-      {applicationData.length === 0 ? (
+      {isLoading ? (
+        <div className="flex items-center justify-center py-10">
+          <span className="text-gray-40">로딩 중...</span>
+        </div>
+      ) : applications.length === 0 ? (
         <EmptyContent
           title="신청 내역"
-          content="아직 신청 내역이 없어요."
+          content={error || '아직 신청 내역이 없어요.'}
           buttonText="공고 보러가기"
-          onButtonClick={handleClick}
+          onButtonClick={() => router.push('/')}
         />
       ) : (
         <>
@@ -110,22 +103,29 @@ const ApplicationHistory = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  {currentItems.map((item, index) => (
-                    <tr key={index}>
-                      <td className={tbStyle}>{item.storeName}</td>
-                      <td className={tbStyle}>{formatTimeRange(item.startTime, item.workHours)}</td>
-                      <td className={tbStyle}>{item.hourlyRate.toLocaleString()}원</td>
-                      <td
-                        className={`${tbStyle} z-100 sticky right-0 border-l border-gray-20 bg-white lg:border-none`}
-                      >
-                        <div
-                          className={`inline-block rounded-[1.25rem] px-[0.625rem] py-[0.375rem] text-sm font-bold ${getStatusColor(item.status)}`}
+                  {currentItems.map((item, index) => {
+                    const { shop, notice, status } = item.item;
+                    const { name } = shop.item;
+                    const { hourlyPay, startsAt, workhour } = notice.item;
+
+                    const statusData = getStatus(status);
+                    return (
+                      <tr key={index}>
+                        <td className={tbStyle}>{name}</td>
+                        <td className={tbStyle}>{formatTimeRange(startsAt, workhour)}</td>
+                        <td className={tbStyle}>{hourlyPay.toLocaleString()}원</td>
+                        <td
+                          className={`${tbStyle} z-100 sticky right-0 border-l border-gray-20 bg-white lg:border-none`}
                         >
-                          {item.status}
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
+                          <div
+                            className={`inline-block rounded-[1.25rem] px-[0.625rem] py-[0.375rem] text-sm font-bold ${statusData.color}`}
+                          >
+                            {statusData.text}
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  })}
                 </tbody>
               </table>
             </div>
