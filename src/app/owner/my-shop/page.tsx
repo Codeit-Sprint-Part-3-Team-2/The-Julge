@@ -49,7 +49,6 @@ export default function MyShopPage() {
 
   useEffect(() => {
     if (isFetching || !hasNext) return;
-
     const observer = new IntersectionObserver(
       (entries) => {
         if (entries[0].isIntersecting) {
@@ -61,11 +60,9 @@ export default function MyShopPage() {
     );
 
     const currentRef = bottomDivRef.current;
-
     if (currentRef) {
       observer.observe(currentRef);
     }
-
     return () => {
       if (currentRef) {
         observer.unobserve(currentRef);
