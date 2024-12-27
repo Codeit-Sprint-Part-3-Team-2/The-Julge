@@ -3,8 +3,17 @@
 import React from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 
-export default function Footer() {
+interface FooterProps {
+  hiddenPaths: string[]; // 숨길 경로 리스트
+}
+
+export default function Footer({ hiddenPaths }: FooterProps) {
+  const pathname = usePathname();
+  const hiddenFooter = hiddenPaths.some((path) => pathname.startsWith(path));
+  if (hiddenFooter) return null;
+
   return (
     <footer className="flex h-32 bg-gray-10 text-gray-50 sm:h-[100px]">
       <div className="ml-5 mr-5 flex w-full justify-between gap-4 pt-7 sm:ml-8 sm:mr-8 sm:flex-row sm:items-center sm:gap-0 sm:p-0 lg:ml-56 lg:mr-56">
