@@ -1,8 +1,5 @@
-import axios from 'axios';
 import { NoticeItem, ApiResponse, NoticeDetail, ApplicationResponse } from '../types/Notice';
-
-const apiToken = process.env.NEXT_PUBLIC_API_TOKEN;
-// 후에 제거할 토큰!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+import API from './register-api';
 
 export const fetchNotices = async (
   currentPage: number,
@@ -12,9 +9,7 @@ export const fetchNotices = async (
   keyword?: string
 ): Promise<{ items: NoticeItem[]; count: number }> => {
   try {
-    let url = `https://bootcamp-api.codeit.kr/api/11-2/the-julge/notices?offset=${
-      (currentPage - 1) * itemsPerPage
-    }&limit=${itemsPerPage}&sort=${sortOption}`;
+    let url = `/notices?offset=${(currentPage - 1) * itemsPerPage}&limit=${itemsPerPage}&sort=${sortOption}`;
 
     if (filterOptions.locations.length > 0) {
       filterOptions.locations.forEach((location) => {
@@ -36,7 +31,7 @@ export const fetchNotices = async (
       url += `&keyword=${encodeURIComponent(keyword)}`;
     }
 
-    const response = await axios.get<ApiResponse<NoticeItem>>(url);
+    const response = await API.get<ApiResponse<NoticeItem>>(url);
     const formattedData = response.data.items.map((data: { item: NoticeItem }) => ({
       ...data.item,
       shopId: data.item.shop.item.id,
@@ -50,20 +45,14 @@ export const fetchNotices = async (
 };
 
 export const fetchNoticeDetail = async (shopId: string, noticeId: string) => {
-  const response = await axios.get<{ item: NoticeDetail }>(
-    `https://bootcamp-api.codeit.kr/api/11-2/the-julge/shops/${shopId}/notices/${noticeId}`
-  );
+  const response = await API.get<{ item: NoticeDetail }>(`/shops/${shopId}/notices/${noticeId}`);
   return response.data.item;
 };
 
 export const fetchApplicationId = async (shopId: string, noticeId: string) => {
-  const response = await axios.get<ApplicationResponse>(
-    `https://bootcamp-api.codeit.kr/api/11-2/the-julge/shops/${shopId}/notices/${noticeId}/applications`,
-    {
-      headers: {
-        Authorization: `Bearer ${apiToken}`,
-      },
-    }
+  const response = await API.get<ApplicationResponse>(
+    `/shops/${shopId}/notices/${noticeId}/applications`,
+    {}
   );
 
   const application = response.data.items.find((app) => app.item.status !== 'canceled');
@@ -71,15 +60,7 @@ export const fetchApplicationId = async (shopId: string, noticeId: string) => {
 };
 
 export const applyForNotice = async (shopId: string, noticeId: string) => {
-  await axios.post(
-    `https://bootcamp-api.codeit.kr/api/11-2/the-julge/shops/${shopId}/notices/${noticeId}/applications`,
-    {},
-    {
-      headers: {
-        Authorization: `Bearer ${apiToken}`,
-      },
-    }
-  );
+  await API.post(`/shops/${shopId}/notices/${noticeId}/applications`, {}, {});
 };
 
 export const cancelApplication = async (
@@ -87,13 +68,9 @@ export const cancelApplication = async (
   noticeId: string,
   applicationId: string
 ) => {
-  await axios.put(
-    `https://bootcamp-api.codeit.kr/api/11-2/the-julge/shops/${shopId}/notices/${noticeId}/applications/${applicationId}`,
+  await API.put(
+    `/shops/${shopId}/notices/${noticeId}/applications/${applicationId}`,
     { status: 'canceled' },
-    {
-      headers: {
-        Authorization: `Bearer ${apiToken}`,
-      },
-    }
+    {}
   );
 };
