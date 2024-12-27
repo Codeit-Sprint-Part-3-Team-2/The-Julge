@@ -4,7 +4,6 @@ import React, { useState } from 'react';
 import { useForm, SubmitHandler } from 'react-hook-form';
 import { useRouter } from 'next/navigation';
 import useAuthStore from '../stores/authStore';
-import axios from 'axios';
 import Image from 'next/image';
 import Modal from '../components/modal/modal';
 import Button from '../components/common/Button';
@@ -46,7 +45,6 @@ function SignupPage() {
 
   const onSubmit: SubmitHandler<SignupFormInputs> = async (data) => {
     const { email, password, userType } = data;
-    console.log('signup===' + signup);
 
     try {
       const signupResponse = await signup({ email: email, password: password, type: userType });
@@ -55,19 +53,24 @@ function SignupPage() {
         setIsSignupComplete(true);
         setShowModal(true);
       }
-    } catch (error) {
-      if (axios.isAxiosError(error)) {
-        // AxiosError 타입으로 처리
-        if (error.response?.status === 409) {
-          setModalMessage('이미 사용중인 이메일입니다.');
+    } catch (error: any) {
+      if (error.response) {
+        // 상태 코드 기반 처리
+        const status = error.response.status;
+
+        if (status === 409) {
+          setModalMessage('이미 사용 중인 이메일입니다.');
           setShowModal(true);
-          return;
-        } else if (error.response?.status === 400) {
-          alert('잘못된 형식입니다.');
-          return;
+        } else if (status === 400) {
+          alert('입력 형식이 잘못되었습니다.');
+        } else {
+          alert('회원가입 중 오류가 발생했습니다. 다시 시도해 주세요.');
         }
+      } else {
+        // 네트워크 오류 또는 Axios가 아닌 에러
+        alert('네트워크 오류가 발생했습니다. 다시 시도해 주세요.');
+        console.error('error:', error);
       }
-      alert('회원가입 중 오류가 발생했습니다. 다시 시도해 주세요.');
       setIsSignupComplete(false);
     }
   };
