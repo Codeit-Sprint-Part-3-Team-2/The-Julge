@@ -27,6 +27,7 @@ export default function NoticePage() {
   const shopId = user?.shop?.item.id;
   const [content, setContent] = useState<NoticeDetail | null>(null);
   const [applications, setApplications] = useState<NoticeApplicationItem | null>(null);
+  const [offset, setOffset] = useState<number>(0);
   const [page, setPage] = useState<number>(1);
 
   const fetchNoticeDetail = useCallback(async () => {
@@ -35,11 +36,12 @@ export default function NoticePage() {
   }, [shopId, id]);
 
   const fetchNoticeApplications = useCallback(async () => {
-    const response = await getNoticeApplications(shopId as string, id, page, LIMIT);
+    const response = await getNoticeApplications(shopId as string, id, offset, LIMIT);
     setApplications(response);
-  }, [shopId, id, page]);
+  }, [shopId, id, offset]);
 
   const handlePageChange = (page: number) => {
+    setOffset((page - 1) * LIMIT);
     setPage(page);
   };
 
@@ -66,7 +68,7 @@ export default function NoticePage() {
         </section>
         <section className="sm:my-30 my-20">
           <h3 className="h3">신청자 목록</h3>
-          {applications.items.length >= 1 ? (
+          {applications.items.length > 0 ? (
             <div className="mt-8 w-full rounded-lg border">
               <ApplicationTable
                 applications={applications.items}
@@ -78,6 +80,7 @@ export default function NoticePage() {
                 page={page}
                 limit={LIMIT}
                 totalCount={applications.count}
+                hasNext={applications.hasNext}
                 onChange={handlePageChange}
               />
             </div>

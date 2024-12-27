@@ -26,19 +26,17 @@ export default function NoticeRegisterPage({
   token,
   shopId,
   noticeId,
-  createApi,
-  editApi,
+  onChange,
 }: {
   mode: 'create' | 'edit';
   token: string;
   shopId: string;
   noticeId?: string;
-  createApi?: (token: string, shopId: string, data: PostNotice) => Promise<PostNoticeResponseItem>;
-  editApi?: (
+  onChange: (
     token: string,
     shopId: string,
-    noticeId: string,
-    data: PostNotice
+    data: PostNotice,
+    noticeid?: string
   ) => Promise<PostNoticeResponseItem>;
 }) {
   const router = useRouter();
@@ -76,12 +74,12 @@ export default function NoticeRegisterPage({
     };
 
     if (mode === 'create') {
-      const response = await createApi?.(token, shopId, data);
+      const response = await onChange(token, shopId, data);
       if (!response) return;
       setResponse(response);
       setModalOpen(true);
     } else {
-      const response = await editApi?.(token, shopId, noticeId as string, data);
+      const response = await onChange(token, shopId, data, noticeId as string);
       if (!response) return;
       setResponse(response);
       setModalOpen(true);

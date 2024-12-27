@@ -19,7 +19,7 @@ export default function NoticeRegisterEditPage() {
           mode="create"
           token={token}
           shopId={shopId}
-          createApi={(token, shopId, data) => postShopNotice(token, shopId, data)}
+          onChange={(token, shopId, data) => postShopNotice(token, shopId, data)}
         />
       </div>
     </>
