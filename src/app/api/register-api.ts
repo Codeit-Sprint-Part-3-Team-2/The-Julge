@@ -126,3 +126,5 @@ function handleApiError(error: unknown, operation: string) {
   }
   throw new Error(`${operation}에 실패했습니다.`);
 }
+
+export default API;
