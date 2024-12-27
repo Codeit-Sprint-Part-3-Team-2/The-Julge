@@ -75,7 +75,7 @@ const Header = ({ hiddenPaths }: HeaderProps) => {
   // 로그아웃
   const handleLogout = async () => {
     logout();
-    router.push('/login');
+    router.push('/');
   };
 
   if (hiddenHeader) return null;
