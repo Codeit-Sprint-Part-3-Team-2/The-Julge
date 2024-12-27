@@ -4,12 +4,9 @@ import React, { useState } from 'react';
 import { useForm, SubmitHandler } from 'react-hook-form';
 import { useRouter } from 'next/navigation';
 import useAuthStore from '../stores/authStore';
-import axios from 'axios';
 import Image from 'next/image';
 import Modal from '../components/modal/modal';
 import Button from '../components/common/Button';
-
-const BASE_URL = 'https://bootcamp-api.codeit.kr/api/11-2/the-julge/token';
 
 interface LoginFormInputs {
   email: string;
@@ -30,27 +27,28 @@ function LoginPage() {
   } = useForm<LoginFormInputs>({
     mode: 'onBlur',
   });
+  const { login } = useAuthStore();
 
   const onSubmit: SubmitHandler<LoginFormInputs> = async (data) => {
     const { email, password } = data;
-
     try {
-      const response = await axios.post(BASE_URL, { email: email, password: password });
+      const response = await login({ email, password });
 
-      if (response.status === 200) {
-        const { accessToken, type } = response.data.item; // type: 'employee' or 'employer'
-        localStorage.setItem('accessToken', accessToken);
+      // type 값 추출
+      const userType = response?.item?.user?.item?.type;
 
-        // Zustand 상태 업데이트
-        useAuthStore.getState().setToken(accessToken);
-        useAuthStore.getState().setUserType(type);
-
+      // type 값에 따라 라우팅
+      if (userType === 'employee') {
         router.push('/');
+      } else if (userType === 'employer') {
+        router.push('/');
+      } else {
+        console.error('알 수 없는 type 값:', userType);
+        throw new Error('올바르지 않은 사용자 유형입니다.');
       }
     } catch (error) {
-      if (axios.isAxiosError(error)) {
-        setShowModal(true);
-      }
+      console.error('로그인 실패:', error);
+      setShowModal(true);
     }
   };
 
