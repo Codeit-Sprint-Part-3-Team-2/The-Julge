@@ -11,54 +11,48 @@ import axios from 'axios';
 import formatTimeRange from '../../utils/formatTimeRange';
 import { useRecentNoticesStore } from '@/app/stores/useRecentNoticesStore';
 import isPastNotice from '@/app/utils/isPastNotice';
-
-interface ShopItem {
-  id: string;
-  name: string;
-  address1: string;
-  imageUrl: string;
-  originalHourlyPay: number;
-}
-
-interface NoticeItem {
-  id: string;
-  hourlyPay: number;
-  startsAt: string;
-  workhour: number;
-  description: string;
-  closed: boolean;
-  shop: {
-    item: ShopItem;
-  };
-  shopId: string;
-}
-
-interface ApiResponse {
-  items: { item: NoticeItem }[];
-}
+import LoadingSpinner from '../common/LoadingSpinner';
+import { NoticeItem, ApiResponse } from '@/app/types/Notice';
 
 export default function CustomNotices() {
   const [notices, setNotices] = useState<NoticeItem[]>([]);
+  const [loading, setLoading] = useState(true);
   const addNotice = useRecentNoticesStore((state) => state.addNotice);
 
   useEffect(() => {
     const fetchCustomNotices = async () => {
+      setLoading(true);
       try {
-        const response = await axios.get<ApiResponse>(
+        const response = await axios.get<ApiResponse<NoticeItem>>(
           'https://bootcamp-api.codeit.kr/api/11-2/the-julge/notices?offset=0&limit=20'
-        ); // 맞춤공고는 현재 데이터를 20개 받아오는데 설정한 "지역"을 기준으로 불러오게 로직을 변경할 예정입니다.
-        const formattedData = response.data.items.map((data) => ({
+        );
+        /*
+        해당 부분 코드는 정민님이 프로필 로직 구현하시면 후에 수정할 예정이기에 따로 api 파일에 관리하지 않고 있습니다.
+        */
+
+        const formattedData = response.data.items.map((data: { item: NoticeItem }) => ({
           ...data.item,
           shopId: data.item.shop.item.id,
         }));
+
         setNotices(formattedData);
       } catch (error) {
         console.error('Error fetching custom notices:', error);
+      } finally {
+        setLoading(false);
       }
     };
 
     fetchCustomNotices();
   }, []);
+
+  if (loading) {
+    return (
+      <div className="flex h-60 items-center justify-center">
+        <LoadingSpinner />
+      </div>
+    );
+  }
 
   return (
     <Swiper
