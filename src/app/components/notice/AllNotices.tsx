@@ -5,36 +5,9 @@ import Card from '../common/Card';
 import formatTimeRange from '@/app/utils/formatTimeRange';
 import { fetchNotices } from '@/app/api/noticeApi';
 import { useRecentNoticesStore } from '@/app/stores/useRecentNoticesStore';
+import isPastNotice from '@/app/utils/isPastNotice';
 import LoadingSpinner from '../common/LoadingSpinner';
-
-interface ShopItem {
-  id: string;
-  name: string;
-  address1: string;
-  imageUrl: string;
-  originalHourlyPay: number;
-}
-
-interface NoticeItem {
-  id: string;
-  hourlyPay: number;
-  startsAt: string;
-  workhour: number;
-  description: string;
-  closed: boolean;
-  shop: {
-    item: ShopItem;
-  };
-  shopId: string;
-}
-
-interface AllNoticesProps {
-  currentPage: number;
-  itemsPerPage: number;
-  setTotalItems: (total: number) => void;
-  sortOption: string;
-  filterOptions: { locations: string[]; startDate: string; amount: string };
-}
+import { AllNoticesProps, NoticeItem } from '@/app/types/Notice';
 
 export default function AllNotices({
   currentPage,
@@ -42,6 +15,7 @@ export default function AllNotices({
   setTotalItems,
   sortOption,
   filterOptions,
+  query = '',
 }: AllNoticesProps) {
   const [notices, setNotices] = useState<NoticeItem[]>([]);
   const [loading, setLoading] = useState(true);
@@ -55,7 +29,8 @@ export default function AllNotices({
           currentPage,
           itemsPerPage,
           sortOption,
-          filterOptions
+          filterOptions,
+          query
         );
         setNotices(items);
         setTotalItems(count);
@@ -67,7 +42,7 @@ export default function AllNotices({
     };
 
     getNotices();
-  }, [currentPage, itemsPerPage, setTotalItems, sortOption, filterOptions]);
+  }, [currentPage, itemsPerPage, setTotalItems, sortOption, filterOptions, query]);
 
   if (loading) {
     return (
@@ -87,6 +62,8 @@ export default function AllNotices({
             100
           ).toFixed(0);
 
+          const isPast = isPastNotice(notice.startsAt);
+
           return (
             <div key={notice.id} className="w-44 sm:w-[312px]">
               <Card
@@ -102,14 +79,16 @@ export default function AllNotices({
                 noticeId={notice.id}
                 shopId={notice.shopId}
                 onClick={() => addNotice(notice)}
+                closed={notice.closed}
+                past={isPast}
               />
             </div>
           );
         })
       ) : (
         <div className="col-span-2 flex flex-col items-center justify-center lg:col-span-3">
-          <p className="text-lg text-gray-black">해당 조건에 맞는 공고가 없습니다.</p>
-          <p className="text-sm text-orange">필터를 다시 설정해보세요!</p>
+          <p className="mt-10 text-lg text-gray-black">해당 조건에 맞는 공고가 없습니다.</p>
+          <p className="text-sm text-orange">검색어와 필터를 다시 설정해보세요!</p>
         </div>
       )}
     </div>
