@@ -3,13 +3,11 @@
 import React, { useState } from 'react';
 import { useForm, SubmitHandler } from 'react-hook-form';
 import { useRouter } from 'next/navigation';
+import useAuthStore from '../stores/authStore';
 import axios from 'axios';
 import Image from 'next/image';
 import Modal from '../components/modal/modal';
 import Button from '../components/common/Button';
-
-// **API Base URL 추가**
-const BASE_URL = 'https://bootcamp-api.codeit.kr/api/11-2/the-julge/users';
 
 // Form 데이터 타입 정의
 interface SignupFormInputs {
@@ -26,6 +24,7 @@ function SignupPage() {
   const [modalMessage, setModalMessage] = useState('');
   const [isSignupComplete, setIsSignupComplete] = useState(false);
   const router = useRouter();
+  const { signup } = useAuthStore();
 
   const handleCloseModal = () => {
     setShowModal(false);
@@ -47,14 +46,10 @@ function SignupPage() {
 
   const onSubmit: SubmitHandler<SignupFormInputs> = async (data) => {
     const { email, password, userType } = data;
+    console.log('signup===' + signup);
 
     try {
-      const signupResponse = await axios.post(`${BASE_URL}`, {
-        email: email,
-        password: password,
-        type: userType,
-      });
-
+      const signupResponse = await signup({ email: email, password: password, type: userType });
       if (signupResponse.status === 201) {
         setModalMessage('가입이 완료되었습니다.');
         setIsSignupComplete(true);
@@ -62,7 +57,7 @@ function SignupPage() {
       }
     } catch (error) {
       if (axios.isAxiosError(error)) {
-        // AxiosError 타입으로 안전하게 처리
+        // AxiosError 타입으로 처리
         if (error.response?.status === 409) {
           setModalMessage('이미 사용중인 이메일입니다.');
           setShowModal(true);
