@@ -30,13 +30,16 @@ const ProfileRegisterPage = () => {
   const phoneInputRef = useRef<HTMLInputElement | null>(null);
 
   useEffect(() => {
-    if (!userId) {
+    if (!token) {
+      alert('로그인이 필요합니다.');
       router.push('/login');
+      return;
     } else if (type !== 'employee') {
       alert('접근 권한이 없습니다.');
       router.push('/');
+      return;
     }
-  }, [router, userId, type]);
+  }, [token, router, type]);
 
   // 제출 형식
   const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {

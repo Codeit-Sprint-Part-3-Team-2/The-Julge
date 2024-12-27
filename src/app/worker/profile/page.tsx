@@ -41,18 +41,21 @@ const ProfilePage = () => {
   }, [isInitialized, token, userId, getMe, router]);
 
   useEffect(() => {
-    if (type && type !== 'employee') {
+    if (!token) {
+      alert('로그인이 필요합니다.');
+      router.push('/login');
+      return;
+    } else if (type !== 'employee') {
+      alert('접근 권한이 없습니다.');
       router.push('/');
+      return;
     }
-  }, [type, router]);
+  }, [token, router, type]);
 
   if (!isInitialized || !userProfile) {
     return <div>로딩 중...</div>;
   }
 
-  if (type !== 'employee') {
-    return <div>접근 권한이 없습니다.</div>;
-  }
   return (
     <div className="text-gray-black">
       {!!userProfile.name ? (
