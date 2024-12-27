@@ -10,32 +10,9 @@ import Card from '../common/Card';
 import axios from 'axios';
 import formatTimeRange from '../../utils/formatTimeRange';
 import { useRecentNoticesStore } from '@/app/stores/useRecentNoticesStore';
+import isPastNotice from '@/app/utils/isPastNotice';
 import LoadingSpinner from '../common/LoadingSpinner';
-
-interface ShopItem {
-  id: string;
-  name: string;
-  address1: string;
-  imageUrl: string;
-  originalHourlyPay: number;
-}
-
-interface NoticeItem {
-  id: string;
-  hourlyPay: number;
-  startsAt: string;
-  workhour: number;
-  description: string;
-  closed: boolean;
-  shop: {
-    item: ShopItem;
-  };
-  shopId: string;
-}
-
-interface ApiResponse {
-  items: { item: NoticeItem }[];
-}
+import { NoticeItem, ApiResponse } from '@/app/types/Notice';
 
 export default function CustomNotices() {
   const [notices, setNotices] = useState<NoticeItem[]>([]);
@@ -46,13 +23,18 @@ export default function CustomNotices() {
     const fetchCustomNotices = async () => {
       setLoading(true);
       try {
-        const response = await axios.get<ApiResponse>(
-          'https://bootcamp-api.codeit.kr/api/11-2/the-julge/notices?offset=0&limit=10'
-        ); // 맞춤공고는 현재 데이터를 10개 받아오는데 후에 로직 변경 예정입니다.
-        const formattedData = response.data.items.map((data) => ({
+        const response = await axios.get<ApiResponse<NoticeItem>>(
+          'https://bootcamp-api.codeit.kr/api/11-2/the-julge/notices?offset=0&limit=20'
+        );
+        /*
+        해당 부분 코드는 정민님이 프로필 로직 구현하시면 후에 수정할 예정이기에 따로 api 파일에 관리하지 않고 있습니다.
+        */
+
+        const formattedData = response.data.items.map((data: { item: NoticeItem }) => ({
           ...data.item,
           shopId: data.item.shop.item.id,
         }));
+
         setNotices(formattedData);
       } catch (error) {
         console.error('Error fetching custom notices:', error);
@@ -93,6 +75,8 @@ export default function CustomNotices() {
           100
         ).toFixed(0);
 
+        const isPast = isPastNotice(notice.startsAt);
+
         return (
           <SwiperSlide key={notice.id} className="max-w-[176px] sm:max-w-[312px]">
             <Card
@@ -106,6 +90,8 @@ export default function CustomNotices() {
               noticeId={notice.id}
               shopId={notice.shop.item.id}
               onClick={() => addNotice(notice)}
+              closed={notice.closed}
+              past={isPast}
             />
           </SwiperSlide>
         );

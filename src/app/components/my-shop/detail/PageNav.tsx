@@ -6,17 +6,18 @@ export default function PageNav({
   page,
   limit,
   totalCount,
+  hasNext,
   onChange,
 }: {
   page: number;
   limit: number;
   totalCount: number;
+  hasNext: boolean;
   onChange: (page: number) => void;
 }) {
-  // 리스폰스로 오는 hasNext가 다 true 라서 일단 count/limit <= pageNumber로 계산
   const handlePageIcon = (page: number, arrow: 'left' | 'right') => {
     const isDisabledLeft = page === 1;
-    const isDisabledRight = totalCount / limit <= page;
+    const isDisabledRight = !hasNext;
 
     const iconSrc =
       arrow === 'left'
