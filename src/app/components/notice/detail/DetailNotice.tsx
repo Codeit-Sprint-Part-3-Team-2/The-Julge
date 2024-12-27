@@ -1,38 +1,30 @@
 'use client';
 
 import formatTimeRange from '@/app/utils/formatTimeRange';
-import axios from 'axios';
 import Image from 'next/image';
 import { useParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import Button from '../../common/Button';
 import LoadingSpinner from '../../common/LoadingSpinner';
 import getDiscountClass from '@/app/utils/getDiscountClass';
-
-interface ShopItem {
-  name: string;
-  address1: string;
-  imageUrl: string;
-  originalHourlyPay: number;
-  category: string;
-  description: string;
-}
-
-interface NoticeDetail {
-  id: string;
-  hourlyPay: number;
-  startsAt: string;
-  workhour: number;
-  description: string;
-  closed: boolean;
-  shop: {
-    item: ShopItem;
-  };
-}
+import isPastNotice from '@/app/utils/isPastNotice';
+import NoticeModal from '../detail/NoticeModal';
+import {
+  fetchNoticeDetail,
+  fetchApplicationId,
+  applyForNotice,
+  cancelApplication,
+} from '@/app/api/noticeApi';
+import { NoticeDetail } from '@/app/types/Notice';
 
 export default function DetailNotice() {
   const [notice, setNotice] = useState<NoticeDetail | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
+  const [isApplied, setIsApplied] = useState(false);
+  const [modalOpen, setModalOpen] = useState(false);
+  const [modalContent, setModalContent] = useState<string>('');
+  const [modalVariant, setModalVariant] = useState<'alert' | 'confirm'>('alert');
+  const [onConfirm, setOnConfirm] = useState<() => void>(() => () => {});
 
   const params = useParams();
   const shopId = params.shopId as string;
@@ -40,22 +32,74 @@ export default function DetailNotice() {
 
   useEffect(() => {
     if (shopId && noticeId) {
-      const fetchNoticeDetail = async () => {
+      const initializeNotice = async () => {
         try {
-          const response = await axios.get(
-            `https://bootcamp-api.codeit.kr/api/11-2/the-julge/shops/${shopId}/notices/${noticeId}`
-          );
-          setNotice(response.data.item);
+          const noticeData = await fetchNoticeDetail(shopId, noticeId);
+          setNotice(noticeData);
+
+          const applicationId = await fetchApplicationId(shopId, noticeId);
+          if (applicationId) {
+            setIsApplied(true);
+          }
         } catch (error) {
-          console.error('Error fetching notice details:', error);
+          console.error('Error initializing notice:', error);
         } finally {
           setLoading(false);
         }
       };
 
-      fetchNoticeDetail();
+      initializeNotice();
     }
   }, [shopId, noticeId]);
+
+  /* 아래 코드는 후에 프로필 로직을 정민님이 완성하시면 프로필이 있는 지 
+  확인하고 없다면 리다이렉트 시키는 로직을 추가할 예정입니다.
+   */
+  const handleApply = async () => {
+    try {
+      await applyForNotice(shopId, noticeId);
+      setIsApplied(true);
+      setModalContent('신청이 완료되었습니다.');
+      setModalVariant('alert');
+      setOnConfirm(() => () => setModalOpen(false));
+      setModalOpen(true);
+    } catch (error) {
+      console.error('Error applying:', error);
+      setModalContent('신청 중 오류가 발생했습니다.');
+      setModalVariant('alert');
+      setOnConfirm(() => () => setModalOpen(false));
+      setModalOpen(true);
+    }
+  };
+
+  const handleCancel = async () => {
+    setModalContent('신청을 취소하시겠어요?');
+    setModalVariant('confirm');
+    setOnConfirm(() => async () => {
+      try {
+        const applicationId = await fetchApplicationId(shopId, noticeId);
+        if (!applicationId) {
+          setModalContent('신청 정보를 찾을 수 없습니다.');
+          setModalVariant('alert');
+          setOnConfirm(() => () => setModalOpen(false));
+          return;
+        }
+
+        await cancelApplication(shopId, noticeId, applicationId);
+        setIsApplied(false);
+        setModalContent('신청이 취소되었습니다.');
+        setModalVariant('alert');
+        setOnConfirm(() => () => setModalOpen(false));
+      } catch (error) {
+        console.error('Error canceling application:', error);
+        setModalContent('취소 중 오류가 발생했습니다.');
+        setModalVariant('alert');
+        setOnConfirm(() => () => setModalOpen(false));
+      }
+      setModalOpen(true);
+    });
+    setModalOpen(true);
+  };
 
   if (loading) {
     return (
@@ -80,6 +124,8 @@ export default function DetailNotice() {
 
   const contentStyle = 'flex items-center gap-1 text-sm text-gray-50 sm:text-base';
 
+  const isPast = isPastNotice(notice.startsAt);
+
   return (
     <div>
       <div className="mb-4">
@@ -92,6 +138,13 @@ export default function DetailNotice() {
       </div>
       <div className="h-auto w-full rounded-xl border border-gray-20 bg-white p-5 lg:flex lg:h-[356px] lg:w-[963px] lg:p-7">
         <div className="relative h-44 w-full sm:h-[360px] lg:h-[308px] lg:w-[540px]">
+          {(notice.closed || isPast) && (
+            <div className="absolute inset-0 z-10 flex items-center justify-center rounded-xl bg-black bg-opacity-70">
+              <span className="text-xl font-bold text-gray-30 sm:text-[28px]">
+                {notice.closed ? '마감 완료' : '지난 공고'}
+              </span>
+            </div>
+          )}
           <Image
             src={notice.shop.item.imageUrl}
             alt={notice.shop.item.name}
@@ -140,16 +193,24 @@ export default function DetailNotice() {
           <p className="mt-2 text-sm text-gray-black sm:text-base">{notice.description}</p>
           <Button
             className="mt-7 h-[38px] w-full sm:h-[48px] lg:absolute lg:bottom-0 lg:mt-0"
-            onClick={() => alert('신청버튼을 클릭하셨습니다.')}
+            onClick={isApplied ? handleCancel : handleApply}
+            disabled={notice.closed || isPast}
+            variant={isApplied ? 'reverse' : 'primary'}
           >
-            신청하기
+            {notice.closed || isPast ? '신청 불가' : isApplied ? '취소하기' : '신청하기'}
           </Button>
         </div>
       </div>
-      <div className="mt-5 w-full rounded-xl bg-gray-10 p-5 text-sm text-gray-black sm:p-8 sm:text-base">
-        <span className="font-bold">공고설명</span>
-        <p className="mt-2">{notice.shop.item.description}</p>
-      </div>
+      <NoticeModal
+        isOpen={modalOpen}
+        onClose={() => setModalOpen(false)}
+        content={modalContent}
+        confirmText={modalVariant === 'confirm' ? '취소하기' : '확인'}
+        cancelText="아니오"
+        variant={modalVariant}
+        onConfirm={onConfirm}
+        onCancel={() => setModalOpen(false)}
+      />
     </div>
   );
 }

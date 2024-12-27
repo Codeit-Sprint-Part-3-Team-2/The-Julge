@@ -62,7 +62,7 @@ const getMyShop = async (shopId: string) => {
 /** @param limit 페이지 당 공고 수 */
 /** @returns 공고 목록 */
 
-const getShopNotices = async (shopId: string, offset: number = 1, limit: number = 100) => {
+const getShopNotices = async (shopId: string, offset: number = 0, limit: number = 100) => {
   const response = await instance.get(`/shops/${shopId}/notices`, {
     params: {
       offset,
@@ -91,7 +91,7 @@ const getNoticeDetail = async (shopId: string, noticeId: string) => {
 const getNoticeApplications = async (
   shopId: string,
   noticeId: string,
-  offset: number = 1,
+  offset: number = 0,
   limit: number = 5
 ) => {
   const response = await instance.get(`/shops/${shopId}/notices/${noticeId}/applications`, {
@@ -138,13 +138,13 @@ const putNoticeApplication = async (
 const putShopNotice = async (
   token: string,
   shopId: string,
-  noticeId: string,
   data: {
     hourlyPay: number;
     startsAt: string;
     workhour: number;
     description: string;
-  }
+  },
+  noticeId: string
 ) => {
   const response = await instance.put(`/shops/${shopId}/notices/${noticeId}`, data, {
     headers: {

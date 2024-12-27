@@ -1,16 +1,19 @@
 'use client';
 
 import React, { useState } from 'react';
-import AllNotices from './components/notice/AllNotices';
-import CustomNotices from './components/notice/CustomNotices';
-import DetailedFilter from './components/notice/DetailedFilter';
-import NoticeDropdown from './components/notice/NoticeDropdown';
-import Pagination from './components/notice/Pagination';
-import formatSortToApi from './utils/formatSortToApi';
+import { useSearchParams } from 'next/navigation';
+import AllNotices from '../components/notice/AllNotices';
+import DetailedFilter from '../components/notice/DetailedFilter';
+import NoticeDropdown from '../components/notice/NoticeDropdown';
+import Pagination from '../components/notice/Pagination';
+import formatSortToApi from '../utils/formatSortToApi';
 
 const container = 'mx-auto px-4 sm:px-8 lg:px-0 pb-4 max-w-[964px] pt-10 sm:pb-4 lg:pb-14';
 
-export default function Posts() {
+export default function Search() {
+  const searchParams = useSearchParams();
+  const query = searchParams.get('q') || '';
+
   const [currentPage, setCurrentPage] = useState(1);
   const [totalItems, setTotalItems] = useState(0);
   const [sortOption, setSortOption] = useState('마감임박순');
@@ -37,17 +40,12 @@ export default function Posts() {
   };
 
   return (
-    <div className="min-h-[500px]">
-      <div className="bg-red-10">
-        <div className={`sm:pt-14 ${container}`}>
-          <h2 className="mb-5 text-xl font-bold text-gray-black sm:text-[28px]">맞춤 공고</h2>
-          <CustomNotices />
-        </div>
-      </div>
-
-      <div className={`${container} mb-8 flex min-h-[400px] flex-col lg:mb-0`}>
+    <div>
+      <div className={`${container} mb-8 flex min-h-[300px] flex-col lg:mb-0`}>
         <div className={`mb-5 sm:flex sm:items-center sm:justify-between`}>
-          <h2 className="text-xl font-bold text-gray-black sm:text-[28px]">전체 공고</h2>
+          <h2 className="text-xl font-bold text-gray-black sm:text-[28px]">
+            <span className="text-orange">{query}</span>에 대한 공고 목록
+          </h2>
           <div className="mt-4 flex items-center gap-3 sm:mt-0">
             <NoticeDropdown
               onChange={(selectedSort) => {
@@ -64,9 +62,9 @@ export default function Posts() {
           setTotalItems={setTotalItems}
           sortOption={formatSortToApi(sortOption)}
           filterOptions={filterOptions}
+          query={query}
         />
       </div>
-
       <Pagination
         totalItems={totalItems}
         itemsPerPage={itemsPerPage}

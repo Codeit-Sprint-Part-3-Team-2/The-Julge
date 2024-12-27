@@ -14,6 +14,10 @@ export default function NoticeRegisterEditPage() {
     return <div className="my-10 text-center">로그인이 필요합니다.</div>;
   }
 
+  if (!id) {
+    return <div className="my-10 text-center">잘못된 접근입니다.</div>;
+  }
+
   return (
     <>
       <div className="container h-[100%] pb-20 sm:h-[calc(100vh-8rem-6.8rem)]">
@@ -22,7 +26,9 @@ export default function NoticeRegisterEditPage() {
           token={token}
           shopId={shopId}
           noticeId={id as string}
-          editApi={(token, shopId, noticeId, data) => putShopNotice(token, shopId, noticeId, data)}
+          onChange={(token, shopId, data, noticeId) =>
+            putShopNotice(token, shopId, data, noticeId as string)
+          }
         />
       </div>
     </>

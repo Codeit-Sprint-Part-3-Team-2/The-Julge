@@ -50,28 +50,12 @@ export default function StatusLabel({
     return <span className="text-sm text-black">처리 중...</span>;
   }
 
+  if (type === 'employee') {
+    return <span className="text-sm text-black">접근 권한이 없습니다.</span>;
+  }
+
   const handleStatus = () => {
     switch (status) {
-      case 'pending':
-        if (type === 'employer') {
-          return {
-            content: (
-              <div className="flex gap-3">
-                <ApprovalButton
-                  approve={true}
-                  onClick={() => updateApplicationStatus('accepted')}
-                />
-                <ApprovalButton
-                  approve={false}
-                  onClick={() => updateApplicationStatus('rejected')}
-                />
-              </div>
-            ),
-            style: '',
-          };
-        } else {
-          return { content: '대기중', style: 'text-green-20 bg-green-10' };
-        }
       case 'accepted':
         return { content: '승인 완료', style: 'text-blue-20 bg-blue-10' };
       case 'rejected':
@@ -87,7 +71,15 @@ export default function StatusLabel({
 
   return (
     <>
-      <span className={`rounded-full px-3 py-2 text-sm font-semibold ${style}`}>{content}</span>
+      {status !== 'pending' && (
+        <span className={`rounded-full px-3 py-2 text-sm font-semibold ${style}`}>{content}</span>
+      )}
+      {status === 'pending' && (
+        <div className="flex gap-3 text-sm font-semibold">
+          <ApprovalButton approve={true} onClick={() => updateApplicationStatus('accepted')} />
+          <ApprovalButton approve={false} onClick={() => updateApplicationStatus('rejected')} />
+        </div>
+      )}
     </>
   );
 }

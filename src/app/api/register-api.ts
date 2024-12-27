@@ -2,7 +2,7 @@ import axios, { AxiosError } from 'axios';
 
 // axios 인스턴스 생성
 const API = axios.create({
-  baseURL: 'https://bootcamp-api.codeit.kr/api/11-2/the-julge',
+  baseURL: process.env.NEXT_PUBLIC_API_BASE_URL,
   headers: {
     'Content-Type': 'application/json',
   },
