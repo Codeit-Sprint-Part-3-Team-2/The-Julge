@@ -8,6 +8,7 @@ import ProfileInfo from '@/app/components/worker/ProfileInfo';
 import ApplicationHistory from '@/app/components/worker/ApplicationHistory';
 import useAuthStore from '@/app/stores/authStore';
 import { User } from '@/app/types/Auth';
+import LoadingSpinner from '@/app/components/common/LoadingSpinner';
 
 //내 프로필 페이지
 const ProfilePage = () => {
@@ -53,7 +54,11 @@ const ProfilePage = () => {
   }, [token, router, type, isInitialized]);
 
   if (!isInitialized || !userProfile) {
-    return <div>로딩 중...</div>;
+    return (
+      <div className="flex h-60 items-center justify-center">
+        <LoadingSpinner />
+      </div>
+    );
   }
 
   return (
