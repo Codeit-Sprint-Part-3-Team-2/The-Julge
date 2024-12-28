@@ -13,7 +13,7 @@ interface SignupFormInputs {
   email: string;
   password: string;
   confirmPassword: string;
-  userType: string;
+  userType: 'employee' | 'employer';
 }
 
 const emailRegex = /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i;
@@ -45,34 +45,48 @@ function SignupPage() {
 
   const onSubmit: SubmitHandler<SignupFormInputs> = async (data) => {
     const { email, password, userType } = data;
-
     try {
-      const signupResponse = await signup({ email: email, password: password, type: userType });
-      if (signupResponse.status === 201) {
+      const authResponse = await signup({
+        email,
+        password,
+        type: userType as 'employer' | 'employee',
+      });
+
+      if (
+        authResponse.item &&
+        Array.isArray(authResponse.item) &&
+        authResponse.item.length > 0 &&
+        authResponse.item[0].id
+      ) {
         setModalMessage('가입이 완료되었습니다.');
         setIsSignupComplete(true);
         setShowModal(true);
+      } else if (authResponse.item && 'id' in authResponse.item) {
+        setModalMessage('가입이 완료되었습니다.');
+        setIsSignupComplete(true);
+        setShowModal(true);
+      } else {
+        throw new Error('회원가입 응답이 올바르지 않습니다.');
       }
     } catch (error: any) {
-      if (error.response) {
-        // 상태 코드 기반 처리
-        const status = error.response.status;
-
-        if (status === 409) {
-          setModalMessage('이미 사용 중인 이메일입니다.');
-          setShowModal(true);
-        } else if (status === 400) {
-          alert('입력 형식이 잘못되었습니다.');
-        } else {
-          alert('회원가입 중 오류가 발생했습니다. 다시 시도해 주세요.');
-        }
-      } else {
-        // 네트워크 오류 또는 Axios가 아닌 에러
-        alert('네트워크 오류가 발생했습니다. 다시 시도해 주세요.');
-        console.error('error:', error);
-      }
-      setIsSignupComplete(false);
+      handleSignupError(error);
     }
+  };
+  const handleSignupError = (error: any) => {
+    if (error.response) {
+      const status = error.response.status;
+      if (status === 409) {
+        setModalMessage('이미 사용 중인 이메일입니다.');
+      } else if (status === 400) {
+        setModalMessage('입력 형식이 잘못되었습니다.');
+      } else {
+        setModalMessage('회원가입 중 오류가 발생했습니다. 다시 시도해 주세요.');
+      }
+    } else {
+      setModalMessage('네트워크 오류가 발생했습니다. 다시 시도해 주세요.');
+    }
+    setShowModal(true);
+    setIsSignupComplete(false);
   };
 
   const userTypeValue = watch('userType'); // 현재 선택된 회원 유형 감지
