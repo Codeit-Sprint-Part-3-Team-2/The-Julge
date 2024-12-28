@@ -1,12 +1,5 @@
 'use client';
-
-interface PaginationProps {
-  totalItems: number;
-  itemsPerPage: number;
-  currentPage: number;
-  onPageChange: (page: number) => void;
-  className?: string;
-}
+import { PaginationProps } from '@/app/types/Notice';
 
 const Pagination: React.FC<PaginationProps> = ({
   totalItems,

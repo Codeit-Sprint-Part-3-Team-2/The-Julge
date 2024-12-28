@@ -14,6 +14,11 @@ interface AuthStore {
   login: (data: Auth) => Promise<AuthResponse>;
   logout: () => void;
   initialize: () => void;
+  clearAuth: () => void;
+  isEmployee: () => boolean;
+  isEmployer: () => boolean;
+  setUserType: (userType: 'employee' | 'employer') => void;
+  setToken: (token: string) => void;
 }
 
 const useAuthStore = create<AuthStore>()(
@@ -25,6 +30,8 @@ const useAuthStore = create<AuthStore>()(
       token: null,
       profileRegistered: false,
       isInitialized: false,
+      setUserType: (userType: 'employee' | 'employer') => set({ type: userType }),
+      setToken: (token: string) => set({ token }),
 
       initialize: () => {
         const storedToken = localStorage.getItem('accessToken');
@@ -67,7 +74,7 @@ const useAuthStore = create<AuthStore>()(
 
       signup: async (data: Auth): Promise<AuthResponse> => {
         const response = await instance.post('/users', data);
-        return response.data;
+        return response;
       },
 
       login: async (data: Auth): Promise<AuthResponse> => {
@@ -77,6 +84,8 @@ const useAuthStore = create<AuthStore>()(
           token: response.data.item.token,
           userId: response.data.item.user.item.id,
         });
+        get().setToken(response.data.item.token);
+        get().setUserType(response.data.item.type);
 
         localStorage.setItem('accessToken', response.data.item.token);
         localStorage.setItem('userId', response.data.item.user.item.id);
@@ -101,6 +110,21 @@ const useAuthStore = create<AuthStore>()(
           token: null,
         });
       },
+      // clearAuth 추가
+      clearAuth: () => {
+        localStorage.removeItem('accessToken');
+        localStorage.removeItem('userId');
+        set({
+          user: null,
+          userId: null,
+          type: null,
+          token: null,
+        });
+      },
+
+      // 특정 역할 확인 메서드 추가
+      isEmployee: () => get().type === 'employee',
+      isEmployer: () => get().type === 'employer',
     }),
     {
       name: 'auth-storage',
