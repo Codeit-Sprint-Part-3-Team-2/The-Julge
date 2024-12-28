@@ -3,20 +3,17 @@
 import React, { useState } from 'react';
 import { useForm, SubmitHandler } from 'react-hook-form';
 import { useRouter } from 'next/navigation';
-import axios from 'axios';
+import useAuthStore from '../stores/authStore';
 import Image from 'next/image';
 import Modal from '../components/modal/modal';
 import Button from '../components/common/Button';
-
-// **API Base URL 추가**
-const BASE_URL = 'https://bootcamp-api.codeit.kr/api/11-2/the-julge/users';
 
 // Form 데이터 타입 정의
 interface SignupFormInputs {
   email: string;
   password: string;
   confirmPassword: string;
-  userType: string;
+  userType: 'employee' | 'employer';
 }
 
 const emailRegex = /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i;
@@ -26,6 +23,7 @@ function SignupPage() {
   const [modalMessage, setModalMessage] = useState('');
   const [isSignupComplete, setIsSignupComplete] = useState(false);
   const router = useRouter();
+  const { signup } = useAuthStore();
 
   const handleCloseModal = () => {
     setShowModal(false);
@@ -47,34 +45,48 @@ function SignupPage() {
 
   const onSubmit: SubmitHandler<SignupFormInputs> = async (data) => {
     const { email, password, userType } = data;
-
     try {
-      const signupResponse = await axios.post(`${BASE_URL}`, {
-        email: email,
-        password: password,
-        type: userType,
+      const authResponse = await signup({
+        email,
+        password,
+        type: userType as 'employer' | 'employee',
       });
 
-      if (signupResponse.status === 201) {
+      if (
+        authResponse.item &&
+        Array.isArray(authResponse.item) &&
+        authResponse.item.length > 0 &&
+        authResponse.item[0].id
+      ) {
         setModalMessage('가입이 완료되었습니다.');
         setIsSignupComplete(true);
         setShowModal(true);
+      } else if (authResponse.item && 'id' in authResponse.item) {
+        setModalMessage('가입이 완료되었습니다.');
+        setIsSignupComplete(true);
+        setShowModal(true);
+      } else {
+        throw new Error('회원가입 응답이 올바르지 않습니다.');
       }
-    } catch (error) {
-      if (axios.isAxiosError(error)) {
-        // AxiosError 타입으로 안전하게 처리
-        if (error.response?.status === 409) {
-          setModalMessage('이미 사용중인 이메일입니다.');
-          setShowModal(true);
-          return;
-        } else if (error.response?.status === 400) {
-          alert('잘못된 형식입니다.');
-          return;
-        }
-      }
-      alert('회원가입 중 오류가 발생했습니다. 다시 시도해 주세요.');
-      setIsSignupComplete(false);
+    } catch (error: any) {
+      handleSignupError(error);
     }
+  };
+  const handleSignupError = (error: any) => {
+    if (error.response) {
+      const status = error.response.status;
+      if (status === 409) {
+        setModalMessage('이미 사용 중인 이메일입니다.');
+      } else if (status === 400) {
+        setModalMessage('입력 형식이 잘못되었습니다.');
+      } else {
+        setModalMessage('회원가입 중 오류가 발생했습니다. 다시 시도해 주세요.');
+      }
+    } else {
+      setModalMessage('네트워크 오류가 발생했습니다. 다시 시도해 주세요.');
+    }
+    setShowModal(true);
+    setIsSignupComplete(false);
   };
 
   const userTypeValue = watch('userType'); // 현재 선택된 회원 유형 감지
