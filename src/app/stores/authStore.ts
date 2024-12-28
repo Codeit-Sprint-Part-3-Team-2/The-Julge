@@ -73,8 +73,8 @@ const useAuthStore = create<AuthStore>()(
       },
 
       signup: async (data: Auth): Promise<AuthResponse> => {
-        const response = await instance.post('/users', data);
-        return response;
+        const response = await instance.post<AuthResponse>('/users', data);
+        return response.data;
       },
 
       login: async (data: Auth): Promise<AuthResponse> => {
