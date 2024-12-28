@@ -26,13 +26,15 @@ export default function MyShopPage() {
   const bottomDivRef = useRef<HTMLDivElement>(null);
 
   const fetchShop = useCallback(async () => {
-    const response = await getMyShop(shopId as string);
+    if (!shopId) return;
+    const response = await getMyShop(shopId);
     setShop(response.item);
   }, [shopId]);
 
   const fetchNotice = useCallback(async () => {
+    if (!shopId) return;
     setIsFetching(true);
-    const response = await getShopNotices(shopId as string, offset, LIMIT);
+    const response = await getShopNotices(shopId, offset, LIMIT);
     setHasNext(response.hasNext);
     setIsFetching(false);
     setNotice((prev) => {

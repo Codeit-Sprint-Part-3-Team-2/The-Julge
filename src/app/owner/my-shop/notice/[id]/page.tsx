@@ -31,12 +31,14 @@ export default function NoticePage() {
   const [page, setPage] = useState<number>(1);
 
   const fetchNoticeDetail = useCallback(async () => {
-    const response = await getNoticeDetail(shopId as string, id);
+    if (!shopId) return;
+    const response = await getNoticeDetail(shopId, id);
     setContent(response.item);
   }, [shopId, id]);
 
   const fetchNoticeApplications = useCallback(async () => {
-    const response = await getNoticeApplications(shopId as string, id, offset, LIMIT);
+    if (!shopId) return;
+    const response = await getNoticeApplications(shopId, id, offset, LIMIT);
     setApplications(response);
   }, [shopId, id, offset]);
 
