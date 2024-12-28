@@ -52,10 +52,21 @@ function SignupPage() {
         type: userType as 'employer' | 'employee',
       });
 
-      if (authResponse.item.length > 0) {
+      if (
+        authResponse.item &&
+        Array.isArray(authResponse.item) &&
+        authResponse.item.length > 0 &&
+        authResponse.item[0].id
+      ) {
         setModalMessage('가입이 완료되었습니다.');
         setIsSignupComplete(true);
         setShowModal(true);
+      } else if (authResponse.item && 'id' in authResponse.item) {
+        setModalMessage('가입이 완료되었습니다.');
+        setIsSignupComplete(true);
+        setShowModal(true);
+      } else {
+        throw new Error('회원가입 응답이 올바르지 않습니다.');
       }
     } catch (error: any) {
       handleSignupError(error);
