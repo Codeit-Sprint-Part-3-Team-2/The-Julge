@@ -1,12 +1,11 @@
 import axios from 'axios';
-
+import { UserProfile } from '../types/Profile';
 const instance = axios.create({
   baseURL: process.env.NEXT_PUBLIC_API_BASE_URL,
   headers: {
     'Content-Type': 'application/json',
   },
 });
-
 /* 가게의 공고를 등록하는 API */
 /** @param token 토큰 */
 /** @param shopId 가게 ID */
@@ -153,6 +152,68 @@ const putShopNotice = async (
   return response.data;
 };
 
+// 유저 프로필 업데이트
+const updateUserProfile = async (token: string, userId: string, requestBody: UserProfile) => {
+  const response = await instance.put(`/users/${userId}`, requestBody, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+  return response.data;
+};
+
+// 유저 지원 목록 조회
+const getUserApplications = async (
+  token: string,
+  userId: string,
+  offset: number = 0,
+  limit: number = 100
+) => {
+  try {
+    const response = await instance.get(`/users/${userId}/applications`, {
+      params: { offset, limit },
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    return response.data;
+  } catch (error) {
+    console.error('API 호출 오류', error);
+    throw error;
+  }
+};
+
+// 알림 목록 조회 API 
+const getUserNotifications = async (
+  token: string,
+  userId: string,
+  offset: number = 0,
+  limit: number = 5
+) => {
+  try {
+    const response = await instance.get(`/users/${userId}/alerts`, {
+      params: { offset, limit },
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    return response.data;
+  } catch (error) {
+    console.error('알림 목록 조회 실패', error);
+    throw error;
+  }
+};
+
+// 알림 읽음 처리 
+const markNotification = async (token: string, userId: string, alertId: string) => {
+  try {
+    const response = await instance.put(
+      `/users/${userId}/alerts/${alertId}`,
+      { headers: { Authorization: `Bearer ${token}` } }
+    );
+    return response.data;
+  } catch (error) {
+    console.error('알림 읽음 처리 실패', error);
+    throw error;
+  }
+};
+
 export {
   instance,
   postShopNotice,
@@ -163,4 +224,8 @@ export {
   getNoticeApplications,
   putNoticeApplication,
   putShopNotice,
+  updateUserProfile,
+  getUserApplications,
+  getUserNotifications,
+  markNotification
 };

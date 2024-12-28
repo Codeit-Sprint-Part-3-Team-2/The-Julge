@@ -7,6 +7,8 @@ type DropDownBtnProps = {
   categories?: string[]; // 카테고리 목록
   selectedCategory?: string; // 선택된 카테고리
   onSelectCategory: (category: string) => void; // 카테고리 선택 시 부모로 값 전달
+  required?: boolean;
+  className?: string;
 };
 
 export default function DropDownBtn({
@@ -14,6 +16,8 @@ export default function DropDownBtn({
   categories = [],
   selectedCategory,
   onSelectCategory,
+  required = false,
+  className = '',
 }: DropDownBtnProps) {
   const [visible, setVisible] = useState(false);
 
@@ -21,7 +25,7 @@ export default function DropDownBtn({
     <div className="relative w-full">
       <div className="relative w-full">
         <input
-          className="w-full cursor-pointer rounded-md border border-gray-30 py-4 pl-5 text-base font-normal text-gray-black"
+          className={`${className} w-full cursor-pointer rounded-md border border-gray-30 py-4 pl-5 text-base font-normal text-gray-black`}
           type="text"
           id={id}
           name="Category"
@@ -29,6 +33,7 @@ export default function DropDownBtn({
           value={selectedCategory || ''} // 선택된 카테고리 값
           onClick={() => setVisible(!visible)}
           readOnly
+          required={required}
         />
         <div className="absolute right-5 top-1/2 z-10 -translate-y-1/2 cursor-pointer">
           <div
@@ -45,7 +50,7 @@ export default function DropDownBtn({
         </div>
       </div>
       <ul
-        className={`custom-scrollbar absolute top-16 z-20 w-full overflow-y-scroll rounded-md transition-all duration-300 ease-out ${
+        className={`absolute top-16 z-20 w-full overflow-y-scroll rounded-md transition-all duration-300 ease-out custom-scrollbar ${
           visible
             ? 'max-h-60 border border-gray-30 bg-gray-white'
             : 'max-h-0 border border-transparent bg-transparent'
