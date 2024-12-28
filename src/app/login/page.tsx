@@ -32,10 +32,10 @@ function LoginPage() {
   const onSubmit: SubmitHandler<LoginFormInputs> = async (data) => {
     const { email, password } = data;
     try {
-      const response = await login({ email, password });
+      await login({ email, password });
 
-      // type 값 추출
-      const userType = response?.item?.user?.item?.type;
+      // zustand의 type 상태를 가져옴
+      const userType = useAuthStore.getState().type;
 
       // type 값에 따라 라우팅
       if (userType === 'employee') {
