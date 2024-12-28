@@ -16,6 +16,7 @@ import {
   cancelApplication,
 } from '@/app/api/noticeApi';
 import { NoticeDetail } from '@/app/types/Notice';
+import useAuthStore from '@/app/stores/authStore';
 
 export default function DetailNotice() {
   const [notice, setNotice] = useState<NoticeDetail | null>(null);
@@ -29,28 +30,41 @@ export default function DetailNotice() {
   const params = useParams();
   const shopId = params.shopId as string;
   const noticeId = params.noticeId as string;
+  const { userId } = useAuthStore((state) => state);
 
   useEffect(() => {
     if (shopId && noticeId) {
-      const initializeNotice = async () => {
+      const fetchNotice = async () => {
         try {
           const noticeData = await fetchNoticeDetail(shopId, noticeId);
           setNotice(noticeData);
-
-          const applicationId = await fetchApplicationId(shopId, noticeId);
-          if (applicationId) {
-            setIsApplied(true);
-          }
         } catch (error) {
-          console.error('Error initializing notice:', error);
+          console.error('Error fetching notice details:', error);
         } finally {
           setLoading(false);
         }
       };
 
-      initializeNotice();
+      fetchNotice();
     }
   }, [shopId, noticeId]);
+
+  useEffect(() => {
+    if (shopId && noticeId && userId) {
+      const checkApplication = async () => {
+        try {
+          const applicationId = await fetchApplicationId(shopId, noticeId, userId);
+          if (applicationId) {
+            setIsApplied(true);
+          }
+        } catch (error) {
+          console.error('Error checking application:', error);
+        }
+      };
+
+      checkApplication();
+    }
+  }, [shopId, noticeId, userId]);
 
   /* 아래 코드는 후에 프로필 로직을 정민님이 완성하시면 프로필이 있는 지 
   확인하고 없다면 리다이렉트 시키는 로직을 추가할 예정입니다.
@@ -73,11 +87,18 @@ export default function DetailNotice() {
   };
 
   const handleCancel = async () => {
+    if (!userId) {
+      setModalContent('로그인이 필요합니다. 로그인 후 다시 시도해주세요.');
+      setModalVariant('alert');
+      setOnConfirm(() => () => setModalOpen(false));
+      setModalOpen(true);
+      return;
+    }
     setModalContent('신청을 취소하시겠어요?');
     setModalVariant('confirm');
     setOnConfirm(() => async () => {
       try {
-        const applicationId = await fetchApplicationId(shopId, noticeId);
+        const applicationId = await fetchApplicationId(shopId, noticeId, userId);
         if (!applicationId) {
           setModalContent('신청 정보를 찾을 수 없습니다.');
           setModalVariant('alert');
