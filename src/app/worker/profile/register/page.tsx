@@ -13,7 +13,6 @@ import { LOCATION_LIST } from '@/app/constants/location';
 
 // 프로필 등록하기
 const ProfileRegisterPage = () => {
-  // const { type } = useAuthStore();
   const { token, userId, type } = useAuthStore();
   const router = useRouter();
 
@@ -30,9 +29,6 @@ const ProfileRegisterPage = () => {
   const nameInputRef = useRef<HTMLInputElement | null>(null);
   const phoneInputRef = useRef<HTMLInputElement | null>(null);
 
-  // const userId = '19467faa-6476-4b06-824f-7c1949df167e';
-  // const token =
-  //   'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiIxOTQ2N2ZhYS02NDc2LTRiMDYtODI0Zi03YzE5NDlkZjE2N2UiLCJpYXQiOjE3MzUyODA2NTB9.kf7YQbCZ0RGcXYWf3pNuasWnNoaDbGjvEc62WSu9VyQ';
   useEffect(() => {
     if (!userId) {
       alert('로그인이 필요합니다.');
@@ -119,7 +115,13 @@ const ProfileRegisterPage = () => {
     try {
       const response = await updateUserProfile(token, userId, { name, phone, address, bio });
 
-      if (response?.success) {
+      if (
+        response?.item &&
+        response.item.name === name &&
+        response.item.phone === phone &&
+        response.item.address === address &&
+        response.item.bio === bio
+      ) {
         alert('등록이 완료되었습니다.');
         router.push('/worker/profile');
       } else {

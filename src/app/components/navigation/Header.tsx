@@ -74,8 +74,13 @@ const Header = ({ hiddenPaths }: HeaderProps) => {
 
   // 로그아웃
   const handleLogout = async () => {
-    logout();
-    router.push('/');
+    try {
+      await logout();
+      router.push('/');
+      alert('로그아웃 되었습니다.');
+    } catch (error) {
+      console.error('로그아웃 실패:', error);
+    }
   };
 
   if (hiddenHeader) return null;

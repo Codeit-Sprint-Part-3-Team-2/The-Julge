@@ -13,13 +13,6 @@ import { User } from '@/app/types/Auth';
 const ProfilePage = () => {
   const [userProfile, setUserProfile] = useState<User | null>(null);
   const router = useRouter();
-
-  // const userId = '19467faa-6476-4b06-824f-7c1949df167e';
-  // const token =
-  //   'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiIxOTQ2N2ZhYS02NDc2LTRiMDYtODI0Zi03YzE5NDlkZjE2N2UiLCJpYXQiOjE3MzUyODA2NTB9.kf7YQbCZ0RGcXYWf3pNuasWnNoaDbGjvEc62WSu9VyQ';
-  // const { getMe } = useAuthStore();
-  // const type = 'employee';
-
   const { initialize, isInitialized, getMe, type, token, userId } = useAuthStore();
   useEffect(() => {
     initialize();
@@ -48,23 +41,21 @@ const ProfilePage = () => {
   }, [isInitialized, token, userId, getMe, router]);
 
   useEffect(() => {
-    if (!token) {
+    if (isInitialized && !token) {
       alert('로그인이 필요합니다.');
       router.push('/login');
       return;
-    } else if (type !== 'employee') {
+    } else if (isInitialized && type !== 'employee') {
       alert('접근 권한이 없습니다.');
       router.push('/');
       return;
     }
-  }, [token, router, type]);
+  }, [token, router, type, isInitialized]);
 
-  // if (!userProfile) {
-  //   return <div>로딩 중...</div>;
-  // }
   if (!isInitialized || !userProfile) {
     return <div>로딩 중...</div>;
   }
+
   return (
     <div className="text-gray-black">
       {!!userProfile.name ? (
