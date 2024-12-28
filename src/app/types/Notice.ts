@@ -47,9 +47,20 @@ export interface NoticeModalProps {
   variant?: 'alert' | 'confirm';
 }
 
+export interface UserDetail {
+  id: string;
+  email: string;
+  type: 'employer' | 'employee';
+  name?: string;
+  phone?: string;
+  address?: string;
+  bio?: string;
+}
+
 export interface Application {
   id: string;
   status: 'pending' | 'accepted' | 'rejected' | 'canceled';
+  user: { item: UserDetail };
 }
 
 export interface ApplicationResponse {
