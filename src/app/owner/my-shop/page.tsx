@@ -72,7 +72,7 @@ export default function MyShopPage() {
     };
   }, [fetchNotice, offset, hasNext, isFetching]);
 
-  if (!user || !shopId) {
+  if (!user) {
     return <div className="my-10 text-center">로그인이 필요합니다.</div>;
   }
 
