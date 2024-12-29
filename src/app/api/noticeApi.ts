@@ -44,6 +44,26 @@ export const fetchNotices = async (
   }
 };
 
+export const fetchCustomNotices = async (userAddress?: string): Promise<NoticeItem[]> => {
+  try {
+    let url = `/notices?offset=0&limit=100`;
+
+    if (userAddress) {
+      url += `&address=${encodeURIComponent(userAddress)}`;
+    }
+
+    const response = await API.get<ApiResponse<NoticeItem>>(url);
+
+    return response.data.items.map((data: { item: NoticeItem }) => ({
+      ...data.item,
+      shopId: data.item.shop.item.id,
+    }));
+  } catch (error) {
+    console.error('Error fetching custom notices:', error);
+    throw new Error('Failed to fetch custom notices');
+  }
+};
+
 export const fetchNoticeDetail = async (shopId: string, noticeId: string) => {
   const response = await API.get<{ item: NoticeDetail }>(`/shops/${shopId}/notices/${noticeId}`);
   return response.data.item;
