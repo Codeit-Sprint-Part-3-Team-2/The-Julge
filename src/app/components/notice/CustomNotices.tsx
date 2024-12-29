@@ -1,5 +1,3 @@
-'use client';
-
 import { useEffect, useState } from 'react';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import 'swiper/css';
@@ -7,46 +5,44 @@ import 'swiper/css/free-mode';
 import 'swiper/css/autoplay';
 import { FreeMode, Autoplay } from 'swiper/modules';
 import Card from '../common/Card';
-import axios from 'axios';
 import formatTimeRange from '../../utils/formatTimeRange';
 import { useRecentNoticesStore } from '@/app/stores/useRecentNoticesStore';
+import useAuthStore from '@/app/stores/authStore';
 import isPastNotice from '@/app/utils/isPastNotice';
 import LoadingSpinner from '../common/LoadingSpinner';
-import { NoticeItem, ApiResponse } from '@/app/types/Notice';
+import { NoticeItem } from '@/app/types/Notice';
+import { fetchCustomNotices } from '@/app/api/noticeApi';
 
 export default function CustomNotices() {
   const [notices, setNotices] = useState<NoticeItem[]>([]);
   const [loading, setLoading] = useState(true);
   const addNotice = useRecentNoticesStore((state) => state.addNotice);
+  const { isInitialized, getMe, type, token, userId } = useAuthStore();
 
   useEffect(() => {
-    const fetchCustomNotices = async () => {
+    const loadCustomNotices = async () => {
       setLoading(true);
       try {
-        const response = await axios.get<ApiResponse<NoticeItem>>(
-          'https://bootcamp-api.codeit.kr/api/11-2/the-julge/notices?offset=0&limit=20'
-        );
-        /*
-        해당 부분 코드는 정민님이 프로필 로직 구현하시면 후에 수정할 예정이기에 따로 api 파일에 관리하지 않고 있습니다.
-        */
+        let userAddress: string | undefined;
 
-        const formattedData = response.data.items.map((data: { item: NoticeItem }) => ({
-          ...data.item,
-          shopId: data.item.shop.item.id,
-        }));
+        if (isInitialized && type === 'employee' && token && userId) {
+          const profile = await getMe();
+          userAddress = profile.item.address;
+        }
 
-        setNotices(formattedData);
+        const fetchedNotices = await fetchCustomNotices(userAddress);
+        setNotices(fetchedNotices);
       } catch (error) {
-        console.error('Error fetching custom notices:', error);
+        console.error('Error loading notices:', error);
       } finally {
         setLoading(false);
       }
     };
 
-    fetchCustomNotices();
-  }, []);
+    loadCustomNotices();
+  }, [isInitialized, getMe, type, token, userId]);
 
-  if (loading) {
+  if (loading || notices.length === 0) {
     return (
       <div className="flex h-60 items-center justify-center">
         <LoadingSpinner />
