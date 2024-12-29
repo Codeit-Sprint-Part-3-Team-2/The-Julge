@@ -30,7 +30,12 @@ export default function CustomNotices() {
           userAddress = profile.item.address;
         }
 
-        const fetchedNotices = await fetchCustomNotices(userAddress);
+        let fetchedNotices = await fetchCustomNotices(userAddress);
+
+        if (fetchedNotices.length === 0) {
+          fetchedNotices = await fetchCustomNotices();
+        }
+
         setNotices(fetchedNotices);
       } catch (error) {
         console.error('Error loading notices:', error);
