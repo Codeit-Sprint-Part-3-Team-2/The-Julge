@@ -5,7 +5,7 @@ import useAuthStore from '@/app/stores/authStore';
 import { getMyShop, getShopNotices } from '@/app/api/api';
 import { useEffect, useCallback, useState, useRef } from 'react';
 import { Shop, Notice } from '@/app/types/Shop';
-import MyShop from '@/app/components/my-shop/myShop';
+import MyShop from '@/app/components/my-shop/MyShop';
 import NoticeCard from '@/app/components/my-shop/NoticeCard';
 
 const LIMIT = 12;
@@ -93,25 +93,27 @@ export default function MyShopPage() {
         )}
         {shop && <MyShop shop={shop} />}
       </section>
-      <section className="sm:my-30 my-20">
-        <h3 className="h3">내가 등록한 공고</h3>
-        {!notice && (
-          <AddPost
-            content="공고를 등록해 보세요."
-            buttonLink="/owner/my-shop/notice/register"
-            buttonText="공고 등록하기"
-          />
-        )}
-        {notice && shop && (
-          <div className="grid grid-cols-2 gap-4 xl:grid-cols-3">
-            {notice.map((not) => (
-              <div key={not.item.id}>
-                <NoticeCard not={not} shop={shop} closed={not.item.closed} />
-              </div>
-            ))}
-          </div>
-        )}
-      </section>
+      {shop && (
+        <section className="sm:my-30 my-20">
+          <h3 className="h3">내가 등록한 공고</h3>
+          {!notice && (
+            <AddPost
+              content="공고를 등록해 보세요."
+              buttonLink="/owner/my-shop/notice/register"
+              buttonText="공고 등록하기"
+            />
+          )}
+          {notice && shop && (
+            <div className="grid grid-cols-2 gap-4 xl:grid-cols-3">
+              {notice.map((not) => (
+                <div key={not.item.id}>
+                  <NoticeCard not={not} shop={shop} closed={not.item.closed} />
+                </div>
+              ))}
+            </div>
+          )}
+        </section>
+      )}
       <div ref={bottomDivRef} className="h-20"></div>
     </div>
   );
