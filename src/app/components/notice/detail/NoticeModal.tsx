@@ -41,7 +41,11 @@ const NoticeModal: React.FC<NoticeModalProps> = ({
               {cancelText}
             </Button>
           )}
-          <Button variant="primary" onClick={onConfirm || onClose} className="h-[38px] w-20">
+          <Button
+            variant={variant === 'alert' ? 'reverse' : 'primary'}
+            onClick={onConfirm || onClose}
+            className="h-[38px] w-20"
+          >
             {confirmText}
           </Button>
         </div>
