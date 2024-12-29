@@ -1,7 +1,7 @@
 import { useEffect, useRef } from 'react';
 import { formatDistanceToNow } from 'date-fns';
 import { ko } from 'date-fns/locale';
-import { getUserNotifications, markNotification } from '@/app/api/api';
+import { getUserNotifications,  } from '@/app/api/api';
 import Image from 'next/image';
 import { NotificationItem } from './Header';
 
@@ -45,7 +45,7 @@ const Notification = ({
       if (token && userId) {
         try {
           const res = await getUserNotifications(token, userId, 0, 20);
-          setNotifications(res.item || []);
+          setNotifications(res.items || []);
         } catch (error) {
           console.error('알림 가져오기 실패:', error);
         }
@@ -55,7 +55,7 @@ const Notification = ({
     if (isModalOpen) {
       fetchNotifications();
     }
-  }, [isModalOpen, token, userId, setNotifications,]);
+  }, [isModalOpen, token, userId, setNotifications]);
 
   // 시간 포맷팅
   const formatTimeAgo = (timestamp: string) => {
@@ -63,21 +63,19 @@ const Notification = ({
   };
 
   // 알림 읽음 처리
-  const handleMarkAsRead = async (alertId: string) => {
-    try {
-      await markNotification(token, userId, alertId);
-       if (!notifications) return;
-      const updatedNotifications = notifications.map((notification) =>
-        notification.id === alertId
-          ? { ...notification, status: 'read' }
-          : notification
-      );
-      setNotifications(updatedNotifications);
-    } catch (error) {
-      console.error('알림 읽음 처리 실패:', error);
-    }
-  };
-  
+  // const handleMarkAsRead = async (alertId: string) => {
+  //   try {
+  //     await markNotification(token, userId, alertId);
+  //     if (!notifications) return;
+  //     const updatedNotifications = notifications.map((notification) =>
+  //       notification.item.id === alertId ? { ...notification, read: true } : notification
+  //     );
+  //     setNotifications(updatedNotifications);
+  //   } catch (error) {
+  //     console.error('알림 읽음 처리 실패:', error);
+  //   }
+  // };
+
   if (!isModalOpen) return null;
 
   return (
@@ -97,33 +95,31 @@ const Notification = ({
             {notifications?.length === 0 ? (
               <li className="py-16 text-center text-gray-50">알림이 없습니다.</li>
             ) : (
-              notifications?.map((notification: NotificationItem) => (
-                <li
-                  key={notification.id}
-                  className="rounded-md border border-gray-20 bg-white px-3 py-4"
-                  onClick={() => handleMarkAsRead(notification.id)}
-                >
-                  <div
-                    className={`size-[5px] rounded-full ${
-                      notification.status === 'approved' ? 'bg-blue-20' : 'bg-red-40'
-                    }`}
-                  ></div>
-                  <div className="my-1">
-                    {notification.storeName} ({notification.period}) 공고 지원이{' '}
-                    <span
-                      className={
-                        notification.status === 'approved' ? 'text-blue-20' : 'text-red-40'
-                      }
-                    >
-                      {notification.status === 'approved' ? '승인' : '거절'}
-                    </span>
-                    되었어요.
-                  </div>
-                  <div className="text-xs text-gray-40">
-                    {formatTimeAgo(notification.timestamp)}
-                  </div>
-                </li>
-              ))
+              notifications?.map((notification) => {
+                const { item } = notification;
+
+                return (
+                  <li
+                    key={item.id}
+                    className="rounded-md border border-gray-20 bg-white px-3 py-4"
+                    // onClick={() => handleMarkAsRead(item.id)}
+                  >
+                    <div
+                      className={`size-[5px] rounded-full ${
+                        item.result === 'accepted' ? 'bg-blue-20' : 'bg-red-40'
+                      }`}
+                    ></div>
+                    <div className="my-1">
+                      {item.shop.item.name} ({item.notice.item.description}) 공고 지원이{' '}
+                      <span className={item.result === 'accepted' ? 'text-blue-20' : 'text-red-40'}>
+                        {item.result === 'accepted' ? '승인' : '거절'}
+                      </span>
+                      되었어요.
+                    </div>
+                    <div className="text-xs text-gray-40">{formatTimeAgo(item.createdAt)}</div>
+                  </li>
+                );
+              })
             )}
           </ul>
         </div>
