@@ -85,7 +85,7 @@ export default function MyShopPage() {
   }
 
   return (
-    <div className={`container ${!shop && 'h-[100%] pb-20 sm:h-[calc(100vh-8rem-6.8rem)]'}`}>
+    <div className="container">
       <section>
         <h3 className="h3">내 가게</h3>
         {!shop && (
@@ -98,7 +98,7 @@ export default function MyShopPage() {
         {shop && <MyShop shop={shop} />}
       </section>
       {shop && (
-        <section className={`sm:my-30 my-20 h-[100%] ${notice.length === 0 && 'lg:h-[26.5rem]'}`}>
+        <section className="sm:my-30 my-20">
           <h3 className="h3">내가 등록한 공고</h3>
           {notice.length === 0 && (
             <AddPost
@@ -118,7 +118,7 @@ export default function MyShopPage() {
           )}
         </section>
       )}
-      <div ref={bottomDivRef} className="h-5 sm:h-10 md:h-24"></div>
+      <div ref={bottomDivRef} className="h-10"></div>
     </div>
   );
 }
