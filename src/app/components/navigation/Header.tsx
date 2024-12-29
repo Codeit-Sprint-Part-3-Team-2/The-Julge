@@ -72,7 +72,6 @@ const Header = ({ hiddenPaths }: HeaderProps) => {
 
         const notifications = response.items || [];
         setNotifications(notifications);
-        console.log(notifications, 'res');
       } catch (error) {
         console.error('알림 가져오기 실패:', error);
       }

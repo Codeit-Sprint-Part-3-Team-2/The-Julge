@@ -31,7 +31,6 @@ const ProfilePage = () => {
       try {
         const res = await getMe();
         setUserProfile(res.item);
-        console.log(res.item, 'res');
       } catch (error) {
         console.error('프로필 로드 실패:', error);
         router.push('/login');
