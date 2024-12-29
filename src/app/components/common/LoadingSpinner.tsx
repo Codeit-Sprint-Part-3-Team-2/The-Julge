@@ -8,7 +8,7 @@ const LoadingSpinner = ({ size = 15, color = '#ea3c12' }) => {
   useEffect(() => {
     setLoading(true);
     setTimeout(() => {
-      setData('API에서 받은 데이터');
+      setData('');
       setLoading(false);
     }, 2000);
   }, []);

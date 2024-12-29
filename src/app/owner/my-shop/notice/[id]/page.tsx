@@ -68,7 +68,7 @@ export default function NoticePage() {
           <h3 className="h3">{content.shop.item.name}</h3>
           <MyNotice notice={content} />
         </section>
-        <section className="sm:my-30 my-20">
+        <section className="sm:my-30 mb-[8rem] mt-20">
           <h3 className="h3">신청자 목록</h3>
           {applications.items.length > 0 ? (
             <div className="mt-8 w-full rounded-lg border">
