@@ -49,14 +49,21 @@ export const fetchNoticeDetail = async (shopId: string, noticeId: string) => {
   return response.data.item;
 };
 
-export const fetchApplicationId = async (shopId: string, noticeId: string) => {
-  const response = await API.get<ApplicationResponse>(
-    `/shops/${shopId}/notices/${noticeId}/applications`,
-    {}
-  );
+export const fetchApplicationId = async (shopId: string, noticeId: string, userId: string) => {
+  try {
+    const response = await API.get<ApplicationResponse>(
+      `/shops/${shopId}/notices/${noticeId}/applications`
+    );
 
-  const application = response.data.items.find((app) => app.item.status !== 'canceled');
-  return application ? application.item.id : null;
+    const application = response.data.items.find(
+      (app) => app.item.user.item.id === userId && app.item.status !== 'canceled'
+    );
+
+    return application ? application.item.id : null;
+  } catch (error) {
+    console.error('Error fetching application ID:', error);
+    return null;
+  }
 };
 
 export const applyForNotice = async (shopId: string, noticeId: string) => {
