@@ -118,7 +118,7 @@ export default function MyShopPage() {
           )}
         </section>
       )}
-      <div ref={bottomDivRef} className="h-10"></div>
+      <div ref={bottomDivRef} className="h-20"></div>
     </div>
   );
 }
