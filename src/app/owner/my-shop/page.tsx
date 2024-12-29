@@ -16,10 +16,10 @@ interface NoticeItem {
 }
 
 export default function MyShopPage() {
-  const { user, type } = useAuthStore();
+  const { user, type, getMe } = useAuthStore();
   const shopId = user?.shop?.item.id;
   const [shop, setShop] = useState<Shop | null>(null);
-  const [notice, setNotice] = useState<NoticeItem[] | null>(null);
+  const [notice, setNotice] = useState<NoticeItem[] | []>([]);
   const [offset, setOffset] = useState<number>(0);
   const [hasNext, setHasNext] = useState<boolean>(true);
   const [isFetching, setIsFetching] = useState<boolean>(false);
@@ -44,6 +44,10 @@ export default function MyShopPage() {
       return response.items;
     });
   }, [shopId, offset]);
+
+  useEffect(() => {
+    getMe();
+  }, [getMe]);
 
   useEffect(() => {
     fetchShop();
@@ -81,7 +85,7 @@ export default function MyShopPage() {
   }
 
   return (
-    <div className="container">
+    <div className={`container ${!shop && 'h-[100%] pb-20 sm:h-[calc(100vh-8rem-6.8rem)]'}`}>
       <section>
         <h3 className="h3">내 가게</h3>
         {!shop && (
@@ -94,16 +98,16 @@ export default function MyShopPage() {
         {shop && <MyShop shop={shop} />}
       </section>
       {shop && (
-        <section className="sm:my-30 my-20">
+        <section className={`sm:my-30 my-20 h-[100%] ${notice.length === 0 && 'lg:h-[26.5rem]'}`}>
           <h3 className="h3">내가 등록한 공고</h3>
-          {!notice && (
+          {notice.length === 0 && (
             <AddPost
               content="공고를 등록해 보세요."
               buttonLink="/owner/my-shop/notice/register"
               buttonText="공고 등록하기"
             />
           )}
-          {notice && shop && (
+          {notice.length > 0 && shop && (
             <div className="grid grid-cols-2 gap-4 xl:grid-cols-3">
               {notice.map((not) => (
                 <div key={not.item.id}>
@@ -114,7 +118,7 @@ export default function MyShopPage() {
           )}
         </section>
       )}
-      <div ref={bottomDivRef} className="h-20"></div>
+      <div ref={bottomDivRef} className="h-5 sm:h-10 md:h-24"></div>
     </div>
   );
 }
