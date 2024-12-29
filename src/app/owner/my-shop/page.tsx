@@ -16,10 +16,10 @@ interface NoticeItem {
 }
 
 export default function MyShopPage() {
-  const { user, type } = useAuthStore();
+  const { user, type, getMe } = useAuthStore();
   const shopId = user?.shop?.item.id;
   const [shop, setShop] = useState<Shop | null>(null);
-  const [notice, setNotice] = useState<NoticeItem[] | null>(null);
+  const [notice, setNotice] = useState<NoticeItem[] | []>([]);
   const [offset, setOffset] = useState<number>(0);
   const [hasNext, setHasNext] = useState<boolean>(true);
   const [isFetching, setIsFetching] = useState<boolean>(false);
@@ -44,6 +44,10 @@ export default function MyShopPage() {
       return response.items;
     });
   }, [shopId, offset]);
+
+  useEffect(() => {
+    getMe();
+  }, [getMe]);
 
   useEffect(() => {
     fetchShop();
@@ -72,7 +76,7 @@ export default function MyShopPage() {
     };
   }, [fetchNotice, offset, hasNext, isFetching]);
 
-  if (!user || !shopId) {
+  if (!user) {
     return <div className="my-10 text-center">로그인이 필요합니다.</div>;
   }
 
@@ -93,26 +97,28 @@ export default function MyShopPage() {
         )}
         {shop && <MyShop shop={shop} />}
       </section>
-      <section className="sm:my-30 my-20">
-        <h3 className="h3">내가 등록한 공고</h3>
-        {!notice && (
-          <AddPost
-            content="공고를 등록해 보세요."
-            buttonLink="/owner/my-shop/notice/register"
-            buttonText="공고 등록하기"
-          />
-        )}
-        {notice && shop && (
-          <div className="grid grid-cols-2 gap-4 xl:grid-cols-3">
-            {notice.map((not) => (
-              <div key={not.item.id}>
-                <NoticeCard not={not} shop={shop} closed={not.item.closed} />
-              </div>
-            ))}
-          </div>
-        )}
-      </section>
-      <div ref={bottomDivRef} className="h-20"></div>
+      {shop && (
+        <section className="sm:my-30 mt-20">
+          <h3 className="h3">내가 등록한 공고</h3>
+          {notice.length === 0 && (
+            <AddPost
+              content="공고를 등록해 보세요."
+              buttonLink="/owner/my-shop/notice/register"
+              buttonText="공고 등록하기"
+            />
+          )}
+          {notice.length > 0 && shop && (
+            <div className="grid grid-cols-2 gap-4 xl:grid-cols-3">
+              {notice.map((not) => (
+                <div key={not.item.id}>
+                  <NoticeCard not={not} shop={shop} closed={not.item.closed} />
+                </div>
+              ))}
+            </div>
+          )}
+        </section>
+      )}
+      <div ref={bottomDivRef} className="mt-10 h-20"></div>
     </div>
   );
 }

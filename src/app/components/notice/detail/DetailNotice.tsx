@@ -2,7 +2,7 @@
 
 import formatTimeRange from '@/app/utils/formatTimeRange';
 import Image from 'next/image';
-import { useParams } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import Button from '../../common/Button';
 import LoadingSpinner from '../../common/LoadingSpinner';
@@ -28,6 +28,7 @@ export default function DetailNotice() {
   const [onConfirm, setOnConfirm] = useState<() => void>(() => () => {});
 
   const params = useParams();
+  const router = useRouter();
   const shopId = params.shopId as string;
   const noticeId = params.noticeId as string;
   const { userId } = useAuthStore((state) => state);
@@ -66,11 +67,27 @@ export default function DetailNotice() {
     }
   }, [shopId, noticeId, userId]);
 
-  /* 아래 코드는 후에 프로필 로직을 정민님이 완성하시면 프로필이 있는 지 
-  확인하고 없다면 리다이렉트 시키는 로직을 추가할 예정입니다.
-   */
   const handleApply = async () => {
+    const { getMe, type } = useAuthStore.getState();
+
     try {
+      if (type === 'employer') {
+        setModalContent('"사장"님은 지원하실 수 없어요!');
+        setModalVariant('alert');
+        setOnConfirm(() => () => router.push('/'));
+        setModalOpen(true);
+        return;
+      }
+      const profile = await getMe();
+
+      if (!profile.item.name) {
+        setModalContent('내 프로필을 먼저 등록해 주세요.');
+        setModalVariant('alert');
+        setOnConfirm(() => () => router.push('/worker/profile/register'));
+        setModalOpen(true);
+        return;
+      }
+
       await applyForNotice(shopId, noticeId);
       setIsApplied(true);
       setModalContent('신청이 완료되었습니다.');

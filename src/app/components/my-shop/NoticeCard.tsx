@@ -30,14 +30,12 @@ export default function NoticeCard({
   return (
     <Link href={`/owner/my-shop/notice/${not.item.id}`}>
       <div className="h-[22rem] rounded-xl border p-4">
-        {closed && (
-          <div className="relative">
-            <div className="absolute flex h-[10rem] w-full items-center justify-center rounded-xl bg-black opacity-70">
+        <div className="relative flex h-[10rem] items-center justify-center overflow-hidden rounded-xl bg-gray-20">
+          {closed && (
+            <div className="absolute z-50 flex h-[10rem] w-full items-center justify-center rounded-xl bg-black opacity-70">
               <span className="text-2xl font-semibold text-gray-30">마감 완료</span>
             </div>
-          </div>
-        )}
-        <div className="relative flex h-[10rem] items-center justify-center overflow-hidden rounded-xl bg-gray-20">
+          )}
           <Image fill src={shop.imageUrl} alt="매장 이미지" sizes="(max-width: 640px) 100%" />
         </div>
         <div className="mt-5 flex h-[42%] flex-col justify-between">
