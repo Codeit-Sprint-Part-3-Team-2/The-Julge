@@ -189,6 +189,7 @@ const ProfileRegisterPage = () => {
               selectedCategory={address}
               onSelectCategory={handleAddressChange}
               required
+              className="mt-2"
             />
             {submitAttempted && !address && (
               <p className="mt-1 text-sm text-red-40">{addressError}</p>
