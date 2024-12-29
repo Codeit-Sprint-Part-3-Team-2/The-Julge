@@ -98,7 +98,7 @@ export default function MyShopPage() {
         {shop && <MyShop shop={shop} />}
       </section>
       {shop && (
-        <section className="sm:my-30 my-20">
+        <section className="sm:my-30 mt-20">
           <h3 className="h3">내가 등록한 공고</h3>
           {notice.length === 0 && (
             <AddPost
@@ -118,7 +118,7 @@ export default function MyShopPage() {
           )}
         </section>
       )}
-      <div ref={bottomDivRef} className="h-20"></div>
+      <div ref={bottomDivRef} className="mt-10 h-20"></div>
     </div>
   );
 }
