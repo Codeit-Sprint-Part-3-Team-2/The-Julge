@@ -24,12 +24,9 @@ const ApplicationHistory = () => {
   const router = useRouter();
 
   useEffect(() => {
-    if (!token || !userId) {
-      alert('로그인이 필요합니다.');
-      router.push('/login');
+    if(!token || !userId){
       return;
     }
-
     const fetchApplications = async () => {
       setIsLoading(true);
       setError(null);
@@ -113,7 +110,7 @@ const ApplicationHistory = () => {
                         <td className={tbStyle}>{formatTimeRange(startsAt, workhour)}</td>
                         <td className={tbStyle}>{hourlyPay.toLocaleString()}원</td>
                         <td
-                          className={`${tbStyle} z-100 sticky right-0 border-l border-gray-20 bg-white lg:border-none`}
+                          className={`${tbStyle} z-100 sticky right-0 border-l border-gray-20 bg-white lg:border-l-0`}
                         >
                           <div
                             className={`inline-block rounded-[1.25rem] px-[0.625rem] py-[0.375rem] text-sm font-bold ${statusData.color}`}
