@@ -54,9 +54,11 @@ export default function MyNotice({ notice }: { notice: NoticeDetail }) {
                 : '등록된 설명이 없습니다.'}
             </p>
           </div>
-          <Button className="h-12 w-full" variant="reverse">
-            <Link href={`/owner/my-shop/notice/${notice.id}/edit`}>공고 편집하기</Link>
-          </Button>
+          <Link href={`/owner/my-shop/notice/${notice.id}/edit`}>
+            <Button className="h-12 w-full" variant="reverse">
+              공고 편집하기
+            </Button>
+          </Link>
         </div>
       </div>
       <div className="mt-6 w-full rounded-lg bg-gray-10 p-8">
