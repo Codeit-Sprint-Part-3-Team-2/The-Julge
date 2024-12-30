@@ -57,7 +57,8 @@ export default function ShopCommonForm({
     category.trim() !== '' &&
     address1.trim() !== '' &&
     address2.trim() !== '' &&
-    originalHourlyPay > 0;
+    originalHourlyPay > 0 &&
+    (previewUrl || file);
 
   // 드롭다운 통합
   const renderDropDown = (
@@ -224,9 +225,9 @@ export default function ShopCommonForm({
         <div className="flex flex-col gap-2 md:max-w-[30.1875rem]">
           <div className="flex w-full items-center justify-between">
             <label className="text-base font-normal text-gray-black" htmlFor="Image">
-              가게 이미지
+              가게 이미지*
             </label>
-            {previewUrl && (
+            {mode === 'create' && previewUrl && (
               <div
                 className="h-auto w-full max-w-3.5 cursor-pointer md:max-w-4"
                 onClick={handleRemoveImage}
@@ -248,11 +249,10 @@ export default function ShopCommonForm({
               type="file"
               name="Image"
               id="Image"
-              onChange={handleFileChange} // 파일 선택 시 처리
-              accept="image/*" // 이미지 파일만 허용
+              onChange={handleFileChange}
+              accept="image/*"
             />
 
-            {/* 커스텀 버튼 (이미지 추가하기) */}
             <label
               htmlFor="Image"
               className={`${mode === 'edit' ? 'z-10 bg-gray-black opacity-[70%]' : 'z-0'} absolute inset-0 flex cursor-pointer flex-col items-center justify-center gap-3`}

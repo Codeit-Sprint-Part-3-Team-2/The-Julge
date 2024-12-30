@@ -10,6 +10,7 @@ import useAuthStore from '@/app/stores/authStore';
 import { useRouter } from 'next/navigation';
 import { updateUserProfile } from '@/app/api/api';
 import { LOCATION_LIST } from '@/app/constants/location';
+import Modal from '@/app/components/modal/modal';
 
 // 프로필 수정하기
 const ProfileEditPage = () => {
@@ -25,6 +26,7 @@ const ProfileEditPage = () => {
   const [addressError, setAddressError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [submitAttempted, setSubmitAttempted] = useState(false); // 제출 시 오류 체크
+  const [isOpenModal, setIsOpenModal] = useState(false);
 
   const nameInputRef = useRef<HTMLInputElement | null>(null);
   const phoneInputRef = useRef<HTMLInputElement | null>(null);
@@ -125,12 +127,11 @@ const ProfileEditPage = () => {
 
     if (!token || !userId) return;
 
-    setIsLoading(true); 
+    setIsLoading(true);
 
     try {
       await updateUserProfile(token, userId, { name, phone, address, bio });
-      alert('수정이 완료되었습니다.');
-      router.push('/worker/profile');
+      setIsOpenModal(true);
     } catch (error) {
       console.error('프로필 수정 실패:', error);
       alert('수정에 실패했습니다. 다시 시도해 주세요.');
@@ -141,6 +142,11 @@ const ProfileEditPage = () => {
 
   const handleClose = () => {
     window.history.back();
+  };
+
+  const handleModalClose = () => {
+    setIsOpenModal(false);
+    router.push('/worker/profile');
   };
 
   return (
@@ -188,6 +194,7 @@ const ProfileEditPage = () => {
               selectedCategory={address}
               onSelectCategory={handleAddressChange}
               required
+              className="mt-2"
             />
             {submitAttempted && !address && (
               <p className="mt-1 text-sm text-red-40">{addressError}</p>
@@ -220,6 +227,9 @@ const ProfileEditPage = () => {
           </Button>
         </div>
       </form>
+      <Modal isOpen={isOpenModal} onClose={handleModalClose}>
+        수정이 완료되었습니다.
+      </Modal>
     </LayoutWrapper>
   );
 };

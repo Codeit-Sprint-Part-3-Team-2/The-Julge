@@ -12,10 +12,8 @@ export default function ShopRegisterPage() {
     useModalShopStore();
 
   const handleRegisterSubmit = async (formData: ShopFormData) => {
-    console.log('폼 데이터 확인:', formData);
     try {
-      const result = await registerShop(formData);
-      console.log('가게 등록 성공:', result);
+      await registerShop(formData);
 
       setModalMessage('가게 등록이 완료되었습니다.');
       setRedirectPath('/owner/my-shop');

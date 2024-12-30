@@ -68,9 +68,17 @@ export default function DetailNotice() {
   }, [shopId, noticeId, userId]);
 
   const handleApply = async () => {
-    const { getMe, type } = useAuthStore.getState();
+    const { getMe, type, token } = useAuthStore.getState();
 
     try {
+      if (!token) {
+        setModalContent('로그인이 필요합니다.');
+        setModalVariant('alert');
+        setOnConfirm(() => () => router.push('/login'));
+        setModalOpen(true);
+        return;
+      }
+
       if (type === 'employer') {
         setModalContent('"사장"님은 지원하실 수 없어요!');
         setModalVariant('alert');
