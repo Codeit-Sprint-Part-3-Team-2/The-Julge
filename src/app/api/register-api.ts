@@ -35,7 +35,6 @@ export const registerShop = async (shopData: {
   try {
     const response = await API.post('/shops', shopData);
     if (response.status === 200) {
-      console.log('가게 등록 성공:', response.data);
       return response.data;
     }
   } catch (error) {
