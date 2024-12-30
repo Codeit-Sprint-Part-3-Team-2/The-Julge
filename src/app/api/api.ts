@@ -181,35 +181,45 @@ const getUserApplications = async (
   }
 };
 
-// 알림 목록 조회 API 
-const getUserNotifications = async (
-  token: string,
-  userId: string,
-  offset: number = 0,
-  limit: number = 5
-) => {
+// 알림 목록 조회 API
+const getUserNotifications = async (token: string, userId: string, offset = 0, limit = 10) => {
   try {
     const response = await instance.get(`/users/${userId}/alerts`, {
       params: { offset, limit },
-      headers: { Authorization: `Bearer ${token}` },
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
     });
     return response.data;
   } catch (error) {
-    console.error('알림 목록 조회 실패', error);
-    throw error;
+    if (error instanceof Error) {
+      console.error('알림 목록 조회 실패:', error.message);
+    } else {
+      console.error('알 수 없는 오류:', error);
+    }
   }
 };
 
-// 알림 읽음 처리 
+// 알림 읽음 처리
 const markNotification = async (token: string, userId: string, alertId: string) => {
+  if (!alertId) {
+    console.error('alertId가 유효하지 않습니다:', alertId);
+    throw new Error('Invalid alertId');
+  }
+
   try {
     const response = await instance.put(
       `/users/${userId}/alerts/${alertId}`,
-      { headers: { Authorization: `Bearer ${token}` } }
+      {},
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
     );
     return response.data;
   } catch (error) {
-    console.error('알림 읽음 처리 실패', error);
+    console.error('알림 읽음 처리 실패:', error);
     throw error;
   }
 };
@@ -227,5 +237,5 @@ export {
   updateUserProfile,
   getUserApplications,
   getUserNotifications,
-  markNotification
+  markNotification,
 };

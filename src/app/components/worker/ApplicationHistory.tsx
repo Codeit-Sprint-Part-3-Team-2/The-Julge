@@ -7,6 +7,7 @@ import { formatTimeRange, getStatus } from './Utils';
 import useAuthStore from '@/app/stores/authStore';
 import { getUserApplications } from '@/app/api/api';
 import { UserApplication } from '@/app/types/Profile';
+import LoadingSpinner from '../common/LoadingSpinner';
 
 // 공통 스타일
 const tbStyle = 'px-3 py-5 border-b border-gray-20';
@@ -20,9 +21,6 @@ const ApplicationHistory = () => {
   const itemsPerPage = 5;
 
   const { token, userId } = useAuthStore();
-  // const userId = '19467faa-6476-4b06-824f-7c1949df167e';
-  // const token =
-  //   'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiIxOTQ2N2ZhYS02NDc2LTRiMDYtODI0Zi03YzE5NDlkZjE2N2UiLCJpYXQiOjE3MzUyODA2NTB9.kf7YQbCZ0RGcXYWf3pNuasWnNoaDbGjvEc62WSu9VyQ';
   const router = useRouter();
 
   useEffect(() => {
@@ -68,8 +66,8 @@ const ApplicationHistory = () => {
   return (
     <LayoutWrapper className="bg-gray-5 pb-[5rem] sm:pb-[7.5rem]">
       {isLoading ? (
-        <div className="flex items-center justify-center py-10">
-          <span className="text-gray-40">로딩 중...</span>
+        <div className="flex h-60 items-center justify-center">
+          <LoadingSpinner />
         </div>
       ) : applications.length === 0 ? (
         <EmptyContent

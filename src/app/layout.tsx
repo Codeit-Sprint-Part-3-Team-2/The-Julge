@@ -48,8 +48,10 @@ export default function RootLayout({
   return (
     <html lang="ko">
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
-        <Header hiddenPaths={hiddenPaths} />
-        {children}
+        <div className="h-auto min-h-full pb-32 sm:pb-[100px]">
+          <Header hiddenPaths={hiddenPaths} />
+          {children}
+        </div>
         <Footer hiddenPaths={hiddenPaths} />
       </body>
     </html>

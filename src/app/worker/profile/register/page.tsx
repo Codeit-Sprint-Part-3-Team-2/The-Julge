@@ -10,6 +10,7 @@ import useAuthStore from '@/app/stores/authStore';
 import { useRouter } from 'next/navigation';
 import { updateUserProfile } from '@/app/api/api';
 import { LOCATION_LIST } from '@/app/constants/location';
+import Modal from '@/app/components/modal/modal';
 
 // 프로필 등록하기
 const ProfileRegisterPage = () => {
@@ -25,6 +26,7 @@ const ProfileRegisterPage = () => {
   const [addressError, setAddressError] = useState('');
   const [submitAttempted, setSubmitAttempted] = useState(false); // 제출 시 오류 체크
   const [isLoading, setIsLoading] = useState(false);
+  const [isOpenModal, setIsOpenModal] = useState(false);
 
   const nameInputRef = useRef<HTMLInputElement | null>(null);
   const phoneInputRef = useRef<HTMLInputElement | null>(null);
@@ -122,8 +124,7 @@ const ProfileRegisterPage = () => {
         response.item.address === address &&
         response.item.bio === bio
       ) {
-        alert('등록이 완료되었습니다.');
-        router.push('/worker/profile');
+        setIsOpenModal(true);
       } else {
         alert('프로필 등록에 실패했습니다. 다시 시도해주세요.');
       }
@@ -139,6 +140,11 @@ const ProfileRegisterPage = () => {
     window.history.back();
   };
 
+  const handleModalClose = () => {
+    setIsOpenModal(false);
+    router.push('/worker/profile');
+  };
+
   return (
     <LayoutWrapper className="bg-gray-5 pb-[5rem] text-gray-black">
       <div className="mb-6 flex justify-between sm:mb-8">
@@ -147,7 +153,6 @@ const ProfileRegisterPage = () => {
           <Image src="/header/ic-close.svg" alt="닫기" fill className="object-contain" />
         </button>
       </div>
-
       <form onSubmit={handleSubmit}>
         <div className="mb-5 grid grid-cols-1 gap-5 sm:mb-6 sm:grid-cols-2 sm:gap-y-6 lg:grid-cols-3">
           {/* 이름 */}
@@ -184,6 +189,7 @@ const ProfileRegisterPage = () => {
               selectedCategory={address}
               onSelectCategory={handleAddressChange}
               required
+              className="mt-2"
             />
             {submitAttempted && !address && (
               <p className="mt-1 text-sm text-red-40">{addressError}</p>
@@ -216,6 +222,10 @@ const ProfileRegisterPage = () => {
           </Button>
         </div>
       </form>
+      <Modal isOpen={isOpenModal} onClose={handleModalClose}>
+        등록이 완료되었습니다.
+      </Modal>
+      ;
     </LayoutWrapper>
   );
 };
