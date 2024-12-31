@@ -14,7 +14,7 @@ export default function NoticeRegisterEditPage() {
 
   return (
     <>
-      <div className="container h-[100%] pb-20 sm:h-[calc(100vh-8rem-6.8rem)]">
+      <div className="container pb-20">
         <NoticeRegisterForm
           mode="create"
           token={token}
