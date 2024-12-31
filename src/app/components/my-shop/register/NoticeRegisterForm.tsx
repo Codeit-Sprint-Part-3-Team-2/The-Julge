@@ -72,16 +72,20 @@ export default function NoticeRegisterPage({
       workhour: parseInt(form.workhour),
       description: form.description,
     };
-
-    if (mode === 'create') {
-      const response = await onChange(token, shopId, data);
-      if (!response) return;
-      setResponse(response);
-      setModalOpen(true);
-    } else {
-      const response = await onChange(token, shopId, data, noticeId as string);
-      if (!response) return;
-      setResponse(response);
+    try {
+      if (mode === 'create') {
+        const response = await onChange(token, shopId, data);
+        if (!response) return;
+        setResponse(response);
+        setModalOpen(true);
+      } else {
+        const response = await onChange(token, shopId, data, noticeId as string);
+        if (!response) return;
+        setResponse(response);
+        setModalOpen(true);
+      }
+    } catch (error) {
+      console.error(error);
       setModalOpen(true);
     }
   };
@@ -91,8 +95,10 @@ export default function NoticeRegisterPage({
 
     if (mode === 'create' && response) {
       router.push(`/owner/my-shop/notice/${response.item.id}`);
-    } else {
+    } else if (mode === 'edit' && response) {
       router.push(`/owner/my-shop/notice/${noticeId}`);
+    } else {
+      router.push(`/owner/my-shop`);
     }
   };
 
@@ -104,7 +110,7 @@ export default function NoticeRegisterPage({
         </Modal>
       ) : (
         <Modal isOpen={modalOpen} onClose={handleModalClose}>
-          {mode === 'create' ? '공고 등록에 실패했습니다.' : '공고 수정에 실패했습니다.'}
+          {mode === 'create' ? '공고 등록에 실패하였습니다.' : '공고 수정에 실패하였습니다.'}
         </Modal>
       )}
       <div className="flex items-start justify-between sm:items-center">
