@@ -39,14 +39,14 @@ export default function MyShop({ shop }: { shop: Shop }) {
               {shop.description ? shop.description : '등록된 설명이 없습니다.'}
             </p>
           </div>
-          <div className="flex gap-2">
-            <Link href={`/owner/my-shop/${shopId}/shop-edit`}>
-              <Button className="h-12 w-[50%] md:w-[10.5rem]" variant="reverse">
+          <div className="flex w-full gap-2">
+            <Link href={`/owner/my-shop/${shopId}/shop-edit`} className="w-[50%]">
+              <Button className="h-12 w-full" variant="reverse">
                 편집하기
               </Button>
             </Link>
-            <Link href="/owner/my-shop/notice/register">
-              <Button className="h-12 w-[50%] md:w-[10.5rem]" variant="primary">
+            <Link href="/owner/my-shop/notice/register" className="w-[50%]">
+              <Button className="h-12 w-full" variant="primary">
                 공고 등록하기
               </Button>
             </Link>
