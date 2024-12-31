@@ -181,7 +181,7 @@ const getUserApplications = async (
   }
 };
 
-// 알림 목록 조회 API 
+// 알림 목록 조회 API
 const getUserNotifications = async (
   token: string,
   userId: string,
@@ -200,13 +200,12 @@ const getUserNotifications = async (
   }
 };
 
-// 알림 읽음 처리 
+// 알림 읽음 처리
 const markNotification = async (token: string, userId: string, alertId: string) => {
   try {
-    const response = await instance.put(
-      `/users/${userId}/alerts/${alertId}`,
-      { headers: { Authorization: `Bearer ${token}` } }
-    );
+    const response = await instance.put(`/users/${userId}/alerts/${alertId}`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
     return response.data;
   } catch (error) {
     console.error('알림 읽음 처리 실패', error);
@@ -227,5 +226,5 @@ export {
   updateUserProfile,
   getUserApplications,
   getUserNotifications,
-  markNotification
+  markNotification,
 };

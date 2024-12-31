@@ -110,7 +110,7 @@ export default function NoticeRegisterPage({
         </Modal>
       ) : (
         <Modal isOpen={modalOpen} onClose={handleModalClose}>
-          {mode === 'create' ? '공고 등록에 실패했습니다.' : '공고 수정에 실패했습니다.'}
+          지난 날짜로 등록할 수 없습니다.
         </Modal>
       )}
       <div className="flex items-start justify-between sm:items-center">
