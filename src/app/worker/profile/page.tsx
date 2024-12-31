@@ -8,6 +8,7 @@ import ProfileInfo from '@/app/components/worker/ProfileInfo';
 import ApplicationHistory from '@/app/components/worker/ApplicationHistory';
 import useAuthStore from '@/app/stores/authStore';
 import { User } from '@/app/types/Auth';
+import LoadingSpinner from '@/app/components/common/LoadingSpinner';
 
 //내 프로필 페이지
 const ProfilePage = () => {
@@ -21,16 +22,22 @@ const ProfilePage = () => {
   useEffect(() => {
     if (!isInitialized) return;
 
-    const fetchData = async () => {
-      if ((!token || !userId) && localStorage !== undefined) {
-        router.push('/login');
-        return;
-      }
+    if (!token || !userId) {
+      alert('로그인이 필요합니다.');
+      router.push('/login');
+      return;
+    }
 
+    if (type !== 'employee') {
+      alert('접근 권한이 없습니다.');
+      router.push('/');
+      return;
+    }
+
+    const fetchData = async () => {
       try {
         const res = await getMe();
         setUserProfile(res.item);
-        console.log(res.item, 'res');
       } catch (error) {
         console.error('프로필 로드 실패:', error);
         router.push('/login');
@@ -38,22 +45,14 @@ const ProfilePage = () => {
     };
 
     fetchData();
-  }, [isInitialized, token, userId, getMe, router]);
-
-  useEffect(() => {
-    if (isInitialized && !token) {
-      alert('로그인이 필요합니다.');
-      router.push('/login');
-      return;
-    } else if (isInitialized && type !== 'employee') {
-      alert('접근 권한이 없습니다.');
-      router.push('/');
-      return;
-    }
-  }, [token, router, type, isInitialized]);
+  }, [isInitialized, token, userId, type, getMe, router]);
 
   if (!isInitialized || !userProfile) {
-    return <div>로딩 중...</div>;
+    return (
+      <div className="flex h-60 items-center justify-center">
+        <LoadingSpinner />
+      </div>
+    );
   }
 
   return (

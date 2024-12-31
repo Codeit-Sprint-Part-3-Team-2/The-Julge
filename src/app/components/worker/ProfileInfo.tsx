@@ -1,6 +1,7 @@
 import Image from 'next/image';
 import Button from '../common/Button';
 import { User } from '@/app/types/Auth';
+import LoadingSpinner from '../common/LoadingSpinner';
 
 interface ProfileInfoProps {
   user: User | null;
@@ -10,7 +11,11 @@ interface ProfileInfoProps {
 // 프로필 컴포넌트
 const ProfileInfo = ({ user, onButtonClick }: ProfileInfoProps) => {
   if (!user) {
-    return <div>로딩 중...</div>; 
+    return (
+      <div className="flex h-60 items-center justify-center">
+        <LoadingSpinner />
+      </div>
+    );
   }
   return (
     <div className="flex w-full flex-col justify-between lg:flex-row">

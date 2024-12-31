@@ -16,11 +16,43 @@ interface HeaderProps {
 }
 
 export interface NotificationItem {
-  id: string;
-  storeName: string;
-  period: string;
-  status: string;
-  timestamp: string;
+  item: {
+    id: string;
+    createdAt: string;
+    result: 'accepted' | 'canceled';
+    read: boolean;
+    application: {
+      item: {
+        id: string;
+        status: 'accepted' | 'canceled';
+      };
+      href: string;
+    };
+    shop: {
+      item: {
+        id: string;
+        name: string;
+        category: string;
+        address1: string;
+        address2: string;
+        description: string;
+        imageUrl: string;
+        originalHourlyPay: number;
+      };
+      href: string;
+    };
+    notice: {
+      item: {
+        id: string;
+        hourlyPay: number;
+        description: string;
+        startsAt: string;
+        workhour: number;
+        closed: boolean;
+      };
+      href: string;
+    };
+  };
 }
 
 const Header = ({ hiddenPaths }: HeaderProps) => {
@@ -32,30 +64,33 @@ const Header = ({ hiddenPaths }: HeaderProps) => {
   const hiddenHeader = hiddenPaths.some((path) => pathname.startsWith(path));
   const router = useRouter();
 
-  // 알림 목록 가져오기
+  // 알림가져오기
   const fetchNotifications = useCallback(async () => {
     if (token && user) {
       try {
         const response = await getUserNotifications(token, user.id, 0, 20);
-        setNotifications(response.item || []);
+
+        const notifications = response.items || [];
+        setNotifications(notifications);
       } catch (error) {
         console.error('알림 가져오기 실패:', error);
       }
     }
   }, [token, user]);
 
-  // 알림 아이콘 클릭 시
+  // 알림아이콘 클릭시 모두 읽음처리
   const handleNotificationClick = async () => {
     if (!token || !user) return;
     try {
       if (notifications.length > 0) {
-        // 모든 알림 읽음 처리
         for (const notification of notifications) {
-          await markNotification(token, user.id, notification.id);
+          if (!notification.item.read) {
+            await markNotification(token, user.id, notification.item.id);
+          }
         }
         const updatedNotifications = notifications.map((notification) => ({
           ...notification,
-          status: 'read',
+          read: true,
         }));
         setNotifications(updatedNotifications);
       }
@@ -66,11 +101,12 @@ const Header = ({ hiddenPaths }: HeaderProps) => {
     toggleModal();
   };
 
+  // 페이지 로드 시 알림 체크
   useEffect(() => {
-    if (isModalOpen) {
+    if (token && user) {
       fetchNotifications();
     }
-  }, [isModalOpen, fetchNotifications]);
+  }, [token, user, fetchNotifications]);
 
   // 로그아웃
   const handleLogout = async () => {
@@ -117,7 +153,7 @@ const Header = ({ hiddenPaths }: HeaderProps) => {
               )}
               <button onClick={handleLogout}>로그아웃</button>
               <button onClick={handleNotificationClick} className="relative size-5 sm:size-6">
-                {notifications.some((notification) => notification.status === 'unread') ? (
+                {notifications.some((notification) => !notification.item.read) ? (
                   <Image
                     src="/header/ic-noti-active.svg"
                     alt="알림창(새로운 알림 있음)"
