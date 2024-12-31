@@ -72,16 +72,20 @@ export default function NoticeRegisterPage({
       workhour: parseInt(form.workhour),
       description: form.description,
     };
-
-    if (mode === 'create') {
-      const response = await onChange(token, shopId, data);
-      if (!response) return;
-      setResponse(response);
-      setModalOpen(true);
-    } else {
-      const response = await onChange(token, shopId, data, noticeId as string);
-      if (!response) return;
-      setResponse(response);
+    try {
+      if (mode === 'create') {
+        const response = await onChange(token, shopId, data);
+        if (!response) return;
+        setResponse(response);
+        setModalOpen(true);
+      } else {
+        const response = await onChange(token, shopId, data, noticeId as string);
+        if (!response) return;
+        setResponse(response);
+        setModalOpen(true);
+      }
+    } catch (error) {
+      console.error(error);
       setModalOpen(true);
     }
   };
@@ -91,8 +95,10 @@ export default function NoticeRegisterPage({
 
     if (mode === 'create' && response) {
       router.push(`/owner/my-shop/notice/${response.item.id}`);
-    } else {
+    } else if (mode === 'edit' && response) {
       router.push(`/owner/my-shop/notice/${noticeId}`);
+    } else {
+      router.push(`/owner/my-shop`);
     }
   };
 
